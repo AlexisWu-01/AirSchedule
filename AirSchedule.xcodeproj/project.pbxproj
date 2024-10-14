@@ -25,7 +25,7 @@
 		7BE10EBC2CBD855200E5A3DB /* ActionPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EBB2CBD855000E5A3DB /* ActionPlan.swift */; };
 		7BE10EBE2CBD85A900E5A3DB /* MeetingAvailabilityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EBD2CBD85A400E5A3DB /* MeetingAvailabilityView.swift */; };
 		7BE10EC02CBD890900E5A3DB /* Supporting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EBF2CBD88E900E5A3DB /* Supporting.swift */; };
-		7BE10EC82CBD976A00E5A3DB /* APIKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EC72CBD976800E5A3DB /* APIKeys.swift */; };
+		7BE10ED02CBD99BC00E5A3DB /* APIKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10ECF2CBD99BA00E5A3DB /* APIKeys.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,7 +48,8 @@
 		7BE10EBB2CBD855000E5A3DB /* ActionPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionPlan.swift; sourceTree = "<group>"; };
 		7BE10EBD2CBD85A400E5A3DB /* MeetingAvailabilityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingAvailabilityView.swift; sourceTree = "<group>"; };
 		7BE10EBF2CBD88E900E5A3DB /* Supporting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Supporting.swift; sourceTree = "<group>"; };
-		7BE10EC72CBD976800E5A3DB /* APIKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeys.swift; sourceTree = "<group>"; };
+		7BE10ECD2CBD996800E5A3DB /* keys.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = keys.plist; sourceTree = "<group>"; };
+		7BE10ECF2CBD99BA00E5A3DB /* APIKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeys.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +66,7 @@
 		7BE10E5B2CBCCCFF00E5A3DB = {
 			isa = PBXGroup;
 			children = (
+				7BE10ECD2CBD996800E5A3DB /* keys.plist */,
 				7BE10E982CBCD21400E5A3DB /* AirSchedule */,
 				7BE10E652CBCCCFF00E5A3DB /* Products */,
 			);
@@ -89,7 +91,7 @@
 		7BE10E982CBCD21400E5A3DB /* AirSchedule */ = {
 			isa = PBXGroup;
 			children = (
-				7BE10EC72CBD976800E5A3DB /* APIKeys.swift */,
+				7BE10ECF2CBD99BA00E5A3DB /* APIKeys.swift */,
 				7BE10EA52CBCD84A00E5A3DB /* Services */,
 				7BE10EA42CBCD74C00E5A3DB /* Views */,
 				7BE10EA32CBCD73400E5A3DB /* ViewModels */,
@@ -232,7 +234,7 @@
 				7BE10EB42CBCED0000E5A3DB /* SearchBar.swift in Sources */,
 				7BE10EAC2CBCD9F600E5A3DB /* FlightListViewModel.swift in Sources */,
 				7BE10EA72CBCD85E00E5A3DB /* FlightService.swift in Sources */,
-				7BE10EC82CBD976A00E5A3DB /* APIKeys.swift in Sources */,
+				7BE10ED02CBD99BC00E5A3DB /* APIKeys.swift in Sources */,
 				7BE10EC02CBD890900E5A3DB /* Supporting.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
