@@ -1,0 +1,440 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		7BE10E992CBCD21400E5A3DB /* AirScheduleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10E942CBCD21400E5A3DB /* AirScheduleApp.swift */; };
+		7BE10E9B2CBCD21400E5A3DB /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BE10E922CBCD21400E5A3DB /* Preview Assets.xcassets */; };
+		7BE10E9C2CBCD21400E5A3DB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BE10E952CBCD21400E5A3DB /* Assets.xcassets */; };
+		7BE10E9D2CBCD21400E5A3DB /* thought_process.md in Resources */ = {isa = PBXBuildFile; fileRef = 7BE10E972CBCD21400E5A3DB /* thought_process.md */; };
+		7BE10EA02CBCD23600E5A3DB /* Flight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10E9F2CBCD23200E5A3DB /* Flight.swift */; };
+		7BE10EA72CBCD85E00E5A3DB /* FlightService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EA62CBCD85A00E5A3DB /* FlightService.swift */; };
+		7BE10EAA2CBCD99900E5A3DB /* FlightResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EA92CBCD99200E5A3DB /* FlightResponse.swift */; };
+		7BE10EAC2CBCD9F600E5A3DB /* FlightListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EAB2CBCD9F400E5A3DB /* FlightListViewModel.swift */; };
+		7BE10EAE2CBCDA1000E5A3DB /* FlightListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EAD2CBCDA0A00E5A3DB /* FlightListView.swift */; };
+		7BE10EB02CBCDAA100E5A3DB /* FlightDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EAF2CBCDA9D00E5A3DB /* FlightDetailView.swift */; };
+		7BE10EB22CBCDC3900E5A3DB /* FlightDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EB12CBCDC3500E5A3DB /* FlightDetailViewModel.swift */; };
+		7BE10EB42CBCED0000E5A3DB /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EB32CBCECFC00E5A3DB /* SearchBar.swift */; };
+		7BE10EB62CBD0B5500E5A3DB /* CalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EB52CBD0B5100E5A3DB /* CalendarService.swift */; };
+		7BE10EB82CBD145D00E5A3DB /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EB72CBD145A00E5A3DB /* LLMService.swift */; };
+		7BE10EBA2CBD151500E5A3DB /* LLMResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EB92CBD151100E5A3DB /* LLMResponse.swift */; };
+		7BE10EBC2CBD855200E5A3DB /* ActionPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EBB2CBD855000E5A3DB /* ActionPlan.swift */; };
+		7BE10EBE2CBD85A900E5A3DB /* MeetingAvailabilityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EBD2CBD85A400E5A3DB /* MeetingAvailabilityView.swift */; };
+		7BE10EC02CBD890900E5A3DB /* Supporting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EBF2CBD88E900E5A3DB /* Supporting.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		7BE10E642CBCCCFF00E5A3DB /* AirSchedule.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AirSchedule.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7BE10E922CBCD21400E5A3DB /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		7BE10E942CBCD21400E5A3DB /* AirScheduleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirScheduleApp.swift; sourceTree = "<group>"; };
+		7BE10E952CBCD21400E5A3DB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7BE10E972CBCD21400E5A3DB /* thought_process.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = thought_process.md; sourceTree = "<group>"; };
+		7BE10E9F2CBCD23200E5A3DB /* Flight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Flight.swift; sourceTree = "<group>"; };
+		7BE10EA62CBCD85A00E5A3DB /* FlightService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightService.swift; sourceTree = "<group>"; };
+		7BE10EA92CBCD99200E5A3DB /* FlightResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightResponse.swift; sourceTree = "<group>"; };
+		7BE10EAB2CBCD9F400E5A3DB /* FlightListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightListViewModel.swift; sourceTree = "<group>"; };
+		7BE10EAD2CBCDA0A00E5A3DB /* FlightListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightListView.swift; sourceTree = "<group>"; };
+		7BE10EAF2CBCDA9D00E5A3DB /* FlightDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightDetailView.swift; sourceTree = "<group>"; };
+		7BE10EB12CBCDC3500E5A3DB /* FlightDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightDetailViewModel.swift; sourceTree = "<group>"; };
+		7BE10EB32CBCECFC00E5A3DB /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
+		7BE10EB52CBD0B5100E5A3DB /* CalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarService.swift; sourceTree = "<group>"; };
+		7BE10EB72CBD145A00E5A3DB /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
+		7BE10EB92CBD151100E5A3DB /* LLMResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMResponse.swift; sourceTree = "<group>"; };
+		7BE10EBB2CBD855000E5A3DB /* ActionPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionPlan.swift; sourceTree = "<group>"; };
+		7BE10EBD2CBD85A400E5A3DB /* MeetingAvailabilityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingAvailabilityView.swift; sourceTree = "<group>"; };
+		7BE10EBF2CBD88E900E5A3DB /* Supporting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Supporting.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7BE10E612CBCCCFF00E5A3DB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		7BE10E5B2CBCCCFF00E5A3DB = {
+			isa = PBXGroup;
+			children = (
+				7BE10E982CBCD21400E5A3DB /* AirSchedule */,
+				7BE10E652CBCCCFF00E5A3DB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7BE10E652CBCCCFF00E5A3DB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7BE10E642CBCCCFF00E5A3DB /* AirSchedule.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7BE10E932CBCD21400E5A3DB /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				7BE10E922CBCD21400E5A3DB /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		7BE10E982CBCD21400E5A3DB /* AirSchedule */ = {
+			isa = PBXGroup;
+			children = (
+				7BE10EA52CBCD84A00E5A3DB /* Services */,
+				7BE10EA42CBCD74C00E5A3DB /* Views */,
+				7BE10EA32CBCD73400E5A3DB /* ViewModels */,
+				7BE10E9E2CBCD21900E5A3DB /* Models */,
+				7BE10E932CBCD21400E5A3DB /* Preview Content */,
+				7BE10E942CBCD21400E5A3DB /* AirScheduleApp.swift */,
+				7BE10E952CBCD21400E5A3DB /* Assets.xcassets */,
+				7BE10E972CBCD21400E5A3DB /* thought_process.md */,
+			);
+			path = AirSchedule;
+			sourceTree = "<group>";
+		};
+		7BE10E9E2CBCD21900E5A3DB /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				7BE10EA92CBCD99200E5A3DB /* FlightResponse.swift */,
+				7BE10EBB2CBD855000E5A3DB /* ActionPlan.swift */,
+				7BE10EBF2CBD88E900E5A3DB /* Supporting.swift */,
+				7BE10EB92CBD151100E5A3DB /* LLMResponse.swift */,
+				7BE10E9F2CBCD23200E5A3DB /* Flight.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		7BE10EA32CBCD73400E5A3DB /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				7BE10EB12CBCDC3500E5A3DB /* FlightDetailViewModel.swift */,
+				7BE10EAB2CBCD9F400E5A3DB /* FlightListViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		7BE10EA42CBCD74C00E5A3DB /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				7BE10EB32CBCECFC00E5A3DB /* SearchBar.swift */,
+				7BE10EBD2CBD85A400E5A3DB /* MeetingAvailabilityView.swift */,
+				7BE10EAF2CBCDA9D00E5A3DB /* FlightDetailView.swift */,
+				7BE10EAD2CBCDA0A00E5A3DB /* FlightListView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		7BE10EA52CBCD84A00E5A3DB /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				7BE10EB72CBD145A00E5A3DB /* LLMService.swift */,
+				7BE10EB52CBD0B5100E5A3DB /* CalendarService.swift */,
+				7BE10EA62CBCD85A00E5A3DB /* FlightService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7BE10E632CBCCCFF00E5A3DB /* AirSchedule */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7BE10E722CBCCD0100E5A3DB /* Build configuration list for PBXNativeTarget "AirSchedule" */;
+			buildPhases = (
+				7BE10E602CBCCCFF00E5A3DB /* Sources */,
+				7BE10E612CBCCCFF00E5A3DB /* Frameworks */,
+				7BE10E622CBCCCFF00E5A3DB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AirSchedule;
+			packageProductDependencies = (
+			);
+			productName = AirSchedule;
+			productReference = 7BE10E642CBCCCFF00E5A3DB /* AirSchedule.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		7BE10E5C2CBCCCFF00E5A3DB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					7BE10E632CBCCCFF00E5A3DB = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = 7BE10E5F2CBCCCFF00E5A3DB /* Build configuration list for PBXProject "AirSchedule" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 7BE10E5B2CBCCCFF00E5A3DB;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 7BE10E652CBCCCFF00E5A3DB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7BE10E632CBCCCFF00E5A3DB /* AirSchedule */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7BE10E622CBCCCFF00E5A3DB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7BE10E9B2CBCD21400E5A3DB /* Preview Assets.xcassets in Resources */,
+				7BE10E9C2CBCD21400E5A3DB /* Assets.xcassets in Resources */,
+				7BE10E9D2CBCD21400E5A3DB /* thought_process.md in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7BE10E602CBCCCFF00E5A3DB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7BE10EAA2CBCD99900E5A3DB /* FlightResponse.swift in Sources */,
+				7BE10EBA2CBD151500E5A3DB /* LLMResponse.swift in Sources */,
+				7BE10EA02CBCD23600E5A3DB /* Flight.swift in Sources */,
+				7BE10EB02CBCDAA100E5A3DB /* FlightDetailView.swift in Sources */,
+				7BE10EB62CBD0B5500E5A3DB /* CalendarService.swift in Sources */,
+				7BE10EB82CBD145D00E5A3DB /* LLMService.swift in Sources */,
+				7BE10EB22CBCDC3900E5A3DB /* FlightDetailViewModel.swift in Sources */,
+				7BE10EBC2CBD855200E5A3DB /* ActionPlan.swift in Sources */,
+				7BE10E992CBCD21400E5A3DB /* AirScheduleApp.swift in Sources */,
+				7BE10EAE2CBCDA1000E5A3DB /* FlightListView.swift in Sources */,
+				7BE10EBE2CBD85A900E5A3DB /* MeetingAvailabilityView.swift in Sources */,
+				7BE10EB42CBCED0000E5A3DB /* SearchBar.swift in Sources */,
+				7BE10EAC2CBCD9F600E5A3DB /* FlightListViewModel.swift in Sources */,
+				7BE10EA72CBCD85E00E5A3DB /* FlightService.swift in Sources */,
+				7BE10EC02CBD890900E5A3DB /* Supporting.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		7BE10E702CBCCD0100E5A3DB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		7BE10E712CBCCD0100E5A3DB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		7BE10E732CBCCD0100E5A3DB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"AirSchedule/Preview Content\"";
+				DEVELOPMENT_TEAM = 8D766T7F2J;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.xinyiwu.AirSchedule;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		7BE10E742CBCCD0100E5A3DB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"AirSchedule/Preview Content\"";
+				DEVELOPMENT_TEAM = 8D766T7F2J;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.xinyiwu.AirSchedule;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7BE10E5F2CBCCCFF00E5A3DB /* Build configuration list for PBXProject "AirSchedule" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7BE10E702CBCCD0100E5A3DB /* Debug */,
+				7BE10E712CBCCD0100E5A3DB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7BE10E722CBCCD0100E5A3DB /* Build configuration list for PBXNativeTarget "AirSchedule" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7BE10E732CBCCD0100E5A3DB /* Debug */,
+				7BE10E742CBCCD0100E5A3DB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 7BE10E5C2CBCCCFF00E5A3DB /* Project object */;
+}
