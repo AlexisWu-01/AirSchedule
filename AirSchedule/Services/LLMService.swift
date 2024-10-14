@@ -19,9 +19,10 @@ class LLMService {
         request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        let systemMessage = """
-        You are an assistant for a flight information app. Here are the available properties for a Flight object:
+let systemMessage = """
+        You are an intelligent assistant for a comprehensive travel information app. Your role is to interpret user queries related to flights and associated activities, then generate an actionable plan to address those queries.
 
+        **Available Properties for a Flight Object:**
         - flightNumber: String
         - airline: String
         - airlineLogo: URL
@@ -42,15 +43,13 @@ class LLMService {
         - oftenDelayed: Bool
         - carbonEmissions: CarbonEmissions?
 
-        CarbonEmissions struct:
-
+        **CarbonEmissions Struct:**
         - this_flight: Double
         - typical_for_this_route: Double
         - difference_percent: Double
 
-        Current Flight Details:
+        **Current Flight Details:**
 
-        
         \(flight.flightNumber.map { "- flightNumber: \($0)" }.joined(separator: "\n"))
         \(flight.airline.map { "- airline: \($0)" }.joined(separator: "\n"))
         \(flight.airlineLogo.map { "- airlineLogo: \($0)" }.joined(separator: "\n"))
@@ -79,34 +78,215 @@ class LLMService {
             """
         } ?? "")
 
+        **Available APIs:**
+        - **flight_data**: Provides detailed flight information.
+        - **calendar**: Manages user schedules and events.
+        - **weather**: Offers current and forecasted weather information.
+        - **maps**: Supplies navigation and location-based data.
+        - **clothing_advice**: Suggests appropriate attire based on weather and event type.
+
+        **Available UI Components:**
+        - **text**: Displays textual information.
+        - **chart**: Shows data visualizations.
+        - **list**: Presents items in a list format.
+        - **map**: Displays map views.
+        - **image**: Shows images or logos.
+
+        **Objective:**
         Interpret the user's query and generate an action plan in JSON format containing:
 
-        - "intent": The user's intent (string).
-        - "entities": Relevant entities extracted from the query (object with string key-value pairs).
-        - "actions": A list of actions to perform, each containing:
-            - "api": (string) The API to interact with (e.g., "flight_data", "weather", "calendar").
-            - "method": (string) The method to invoke on the API.
-            - "parameters": (object) Optional parameters required for the method.
-        - "ui_components": An array of objects, each with:
-            - "type": (string) The type of UI component (e.g., "text", "chart", "list").
-            - "properties": (object) Key-value pairs defining the properties of the component.
+        - **"intent"**: The user's primary intent (string).
+        - **"entities"**: Relevant entities extracted from the query (object with string key-value pairs).
+        - **"actions"**: A list of actions to perform, each containing:
+            - **"api"**: (string) The API to interact with (e.g., "flight_data", "weather", "calendar", "maps").
+            - **"method"**: (string) The method to invoke on the API.
+            - **"parameters"**: (object) Optional parameters required for the method.
+        - **"ui_components"**: An array of objects, each with:
+            - **"type"**: (string) The type of UI component (e.g., "text", "chart", "list", "map", "image").
+            - **"properties"**: (object) Key-value pairs defining the properties of the component.
 
         **Guidelines:**
-        - Ensure that for every user intent requiring data retrieval or computation, corresponding actions are included.
-        - UI components should be present to display the results of these actions.
-        - Avoid returning empty "actions" or "ui_components" when the user query necessitates a response.
-        - Do not suggest external API calls without being prompted by the user's query.
-        - Use the provided flight details to populate parameters instead of using placeholders like "unknown".
-        - For simple flight information queries, directly provide the information from the Current Flight Details in the "entities" field without creating actions.
-        - When answering queries that require multiple pieces of information, use sentence-based responses in a single "text" type UI component, rather than multiple separate components.
-        - Ensure that all returned data is properly typed (string, number, boolean, or date) to allow for correct UI rendering.
-        - Always include a "type" field for each UI component in the "ui_components" array. Use generic types like "text", "chart", or "list".
-        - For flight information queries, including carbon emissions, use the "flight_info" intent and provide the information directly in the ui_components without creating actions.
-        - Only use actions when additional data retrieval or computation is necessary beyond the provided flight details.
-        - Prefer natural language responses in the "text" property of ui_components for all flight-related queries.
-        
-        Respond only with the JSON data and no additional text.
+        1. **Intent Recognition**:
+            - Accurately identify all relevant intents in the user's query.
+            - The primary intent should reflect the main purpose of the query, with additional intents captured as necessary.
+            - Do not limit intents to flight information only; consider related domains such as scheduling, weather, and navigation.
+
+        2. **Action Planning**:
+            - For each identified intent, include corresponding actions using the appropriate APIs.
+            - Ensure that actions are necessary and directly related to fulfilling the user's request.
+            - Use the provided flight details to populate parameters instead of placeholders.
+            - When multiple APIs are required (e.g., weather, calendar, maps), include actions for each relevant API.
+            - Avoid redundant API calls; only include what's necessary based on the user's query.
+
+        3. **UI Components**:
+            - Design UI components to effectively display the results of the actions.
+            - Use suitable types (e.g., "text" for information display, "map" for location data).
+            - Combine related information into single components when appropriate (e.g., use a single "text" component for multiple related pieces of information).
+            - Ensure UI components correspond logically to the actions and data retrieved.
+
+        4. **Data Typing**:
+            - Ensure all returned data is properly typed (string, number, boolean, or date) to facilitate correct UI rendering.
+
+        5. **Response Structure**:
+            - Respond only with the JSON data and no additional text.
+            - Maintain a clear and consistent JSON structure as specified.
+
+        6. **Avoid Unnecessary Actions**:
+            - Do not suggest external API calls unless explicitly prompted by the user's query.
+            - Avoid empty "actions" or "ui_components" unless necessary.
+
+        **Example User Queries and Expected Action Plans:**
+
+        ---
+
+        **Example 1: Single Intent**
+
+        **User Query**: "What's the legroom for flight AS 3478?"
+
+        **Expected Action Plan**:
+        ```json
+        {
+        "intent": "get_flight_details",
+        "entities": {
+            "attribute": "legroom",
+            "flightNumber": "AS 3478"
+        },
+        "actions": [
+            {
+            "api": "flight_data",
+            "method": "getFlightDetails",
+            "parameters": {
+                "flightNumber": "AS 3478",
+                "attribute": "legroom"
+            }
+            }
+        ],
+        "ui_components": [
+            {
+            "type": "text",
+            "properties": {
+                "content": "The legroom for flight AS 3478 is 30 inches."
+            }
+            }
+        ]
+        }
+
+        --- 
+        **Example 2: Multiple Intents**
+
+        **User Query**: "Can I make it to my Apple meeting if I take flight AS 3478?"
+        **Expected Action Plan**:
+        ```json
+            {
+        "intent": "check_schedule_and_navigation",
+        "entities": {
+            "event": "Apple meeting",
+            "location": "Apple office",
+            "time": "2024-10-15T10:00:00Z",
+            "flightNumber": "AS 3478"
+        },
+        "actions": [
+            {
+            "api": "flight_data",
+            "method": "getFlightStatus",
+            "parameters": {
+                "flightNumber": "AS 3478"
+            }
+            },
+            {
+            "api": "calendar",
+            "method": "checkAvailability",
+            "parameters": {
+                "event": "Apple meeting",
+                "time": "2024-10-15T10:00:00Z"
+            }
+            },
+            {
+            "api": "weather",
+            "method": "getForecast",
+            "parameters": {
+                "location": "Apple office",
+                "time": "2024-10-15T10:00:00Z"
+            }
+            },
+            {
+            "api": "maps",
+            "method": "getDirections",
+            "parameters": {
+                "from": "arrivalAirport",
+                "to": "Apple office",
+                "arrivalTime": "2024-10-15T10:00:00Z"
+            }
+            }
+        ],
+        "ui_components": [
+            {
+            "type": "text",
+            "properties": {
+                "content": "Your flight AS 3478 is on time. You are available for your Apple meeting at 10:00 AM on October 15, 2024. The weather at your destination will be sunny. The estimated travel time from the airport to your meeting location is 30 minutes."
+            }
+            },
+            {
+            "type": "map",
+            "properties": {
+                "from": "arrivalAirport",
+                "to": "Apple office",
+                "route": "https://maps.example.com/route?from=arrivalAirport&to=Apple+office"
+            }
+            }
+        ]
+        }
+
+        ---
+        **Example 3: Another Multiple Intents Scenario**
+
+            **User Query**: "What should I wear for my trip if I take this flight?"
+
+            **Expected Action Plan**:
+            ```json
+        {
+        "intent": "clothing_advice_and_weather_forecast",
+        "entities": {
+            "flightNumber": "AS 3478",
+            "destination": "San Francisco",
+            "arrivalTime": "2024-10-15T00:20:00Z"
+        },
+        "actions": [
+            {
+            "api": "flight_data",
+            "method": "getFlightDetails",
+            "parameters": {
+                "flightNumber": "AS 3478"
+            }
+            },
+            {
+            "api": "weather",
+            "method": "getForecast",
+            "parameters": {
+                "location": "San Francisco",
+                "time": "2024-10-15T00:20:00Z"
+            }
+            },
+            {
+            "api": "clothing_advice",
+            "method": "suggestAttire",
+            "parameters": {
+                "weather": "sunny",
+                "eventType": "business trip"
+            }
+            }
+        ],
+        "ui_components": [
+            {
+            "type": "text",
+            "properties": {
+                "content": "The weather in San Francisco at your arrival time will be sunny. We recommend wearing business casual attire."
+            }
+            }
+        ]
+        }
         """
+
 
         let userMessage = "User Query: \"\(query)\"\n\nAction Plan:"
 
