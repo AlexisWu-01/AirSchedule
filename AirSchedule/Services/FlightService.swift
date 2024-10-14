@@ -60,12 +60,21 @@ class FlightService {
                     )
                 }
                 
+                let scheduledDepartureTime = self.parseDateTime(flightData.departure_airport.time)
+                let scheduledArrivalTime = self.parseDateTime(flightData.arrival_airport.time)
+                
+                // Parse actual times if available, otherwise use scheduled times
+                let actualDepartureTime = flightData.departure_airport.actual_time.flatMap(self.parseDateTime) ?? scheduledDepartureTime
+                let actualArrivalTime = flightData.arrival_airport.actual_time.flatMap(self.parseDateTime) ?? scheduledArrivalTime
+                
                 let flight = Flight(
                     airline: flightData.airline,
                     airlineCode: flightData.airline, // Assuming airlineCode is the same as airline name
                     flightNumber: flightData.flight_number,
-                    departureTime: self.parseDateTime(flightData.departure_airport.time),
-                    arrivalTime: self.parseDateTime(flightData.arrival_airport.time),
+                    departureTime: scheduledDepartureTime,
+                    arrivalTime: scheduledArrivalTime,
+                    actualDepartureTime: actualDepartureTime,
+                    actualArrivalTime: actualArrivalTime,
                     departureAirport: flightData.departure_airport.id,
                     arrivalAirport: flightData.arrival_airport.id,
                     price: Double(flightGroup.price),
