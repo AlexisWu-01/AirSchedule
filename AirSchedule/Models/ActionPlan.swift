@@ -12,9 +12,14 @@ struct ActionPlan: Codable {
     let entities: [String: String]?
     let actions: [Action]
     let uiComponents: [String]
+
+    enum CodingKeys: String, CodingKey {
+        case intent, entities, actions
+        case uiComponents = "ui_components"
+    }
 }
 
 struct Action: Codable {
-    let action: String
+    let api: String
     let parameters: [String: String]?
 }
