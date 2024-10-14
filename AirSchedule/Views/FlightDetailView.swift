@@ -12,121 +12,142 @@ struct FlightDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 // Flight Header
-                HStack {
-                    AsyncImage(url: URL(string: viewModel.flight.airlineLogo)) { image in
-                        image.resizable()
-                    } placeholder: {
-                        ProgressView()
-                    }
-                    .frame(width: 50, height: 50)
-                    
-                    Text("\(viewModel.flight.airline) Flight \(viewModel.flight.flightNumber)")
-                        .font(.title)
-                }
-                
-                // Essential Flight Information
-                Group {
-                    infoRow("Departure", "\(viewModel.flight.departureAirportName) (\(viewModel.flight.departureAirport))")
-                    infoRow("Arrival", "\(viewModel.flight.arrivalAirportName) (\(viewModel.flight.arrivalAirport))")
-                    infoRow("Date", formattedDate(viewModel.flight.departureTime))
-                    infoRow("Scheduled Departure", formattedTime(viewModel.flight.departureTime))
-                    infoRow("Actual Departure", formattedTime(viewModel.flight.actualDepartureTime ?? viewModel.flight.departureTime))
-                    infoRow("Scheduled Arrival", formattedTime(viewModel.flight.arrivalTime))
-                    infoRow("Actual Arrival", formattedTime(viewModel.flight.actualArrivalTime ?? viewModel.flight.arrivalTime))
-                    infoRow("Price", "$\(String(format: "%.2f", viewModel.flight.price))")
-                    infoRow("Duration", formatDuration(TimeInterval(viewModel.flight.duration)))
-                    infoRow("Airplane Model", viewModel.flight.airplaneModel)
-                    infoRow("Travel Class", viewModel.flight.travelClass)
-                    infoRow("Legroom", viewModel.flight.legroom)
-                    infoRow("Overnight Flight", viewModel.flight.isOvernight ? "Yes" : "No")
-                    infoRow("Often Delayed", viewModel.flight.oftenDelayed ? "Yes" : "No")
-                }
-                
-                if let emissions = viewModel.flight.carbonEmissions {
-                    Group {
-                        Text("Carbon Emissions:")
-                            .font(.headline)
-                        infoRow("This Flight", "\(emissions.this_flight)g")
-                        infoRow("Typical for Route", "\(emissions.typical_for_this_route)g")
-                        infoRow("Difference", "\(emissions.difference_percent)%")
-                    }
-                } else {
-                    Text("Carbon emissions data not available.")
-                }
-                
+                flightHeader
+
+                // Flight Details
+                flightDetails
+
                 // Dynamic UI Components
                 viewModel.dynamicContent
-                
+
                 // User Query Input
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Ask a question about your flight:")
-                        .font(.headline)
-                    TextField("Enter your query here", text: $userQuery, onCommit: submitQuery)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                    Button(action: submitQuery) {
-                        Text("Submit")
-                    }
-                    .buttonStyle(PrimaryButtonStyle())
-                }
-                
-                if isLoading {
-                    ProgressView("Processing...")
-                        .padding()
-                }
-                
-                if let error = errorMessage {
-                    Text("Error: \(error)")
-                        .foregroundColor(.red)
-                        .padding()
-                }
+                userQueryInput
             }
             .padding()
         }
+        .navigationBarTitle("Flight Details", displayMode: .inline)
     }
-    
-    private func infoRow(_ label: String, _ value: String) -> some View {
+
+    private var flightHeader: some View {
         HStack {
-            Text(label)
-                .font(.subheadline)
-                .foregroundColor(.gray)
+            AsyncImage(url: URL(string: viewModel.flight.airlineLogo)) { image in
+                image.resizable().aspectRatio(contentMode: .fit)
+            } placeholder: {
+                ProgressView()
+            }
+            .frame(width: 50, height: 50)
+
+            VStack(alignment: .leading) {
+                Text(viewModel.flight.airline)
+                    .font(.headline)
+                Text(viewModel.flight.flightNumber)
+                    .font(.subheadline)
+            }
+
             Spacer()
-            Text(value)
-                .font(.subheadline)
+
+            Text("$\(String(format: "%.2f", viewModel.flight.price))")
+                .font(.title2)
+                .fontWeight(.bold)
+        }
+        .padding()
+        .background(Color.blue.opacity(0.1))
+        .cornerRadius(10)
+    }
+
+    private var flightDetails: some View {
+        VStack(alignment: .leading, spacing: 15) {
+            flightTimeRow
+            flightDurationRow
+            flightClassRow
+        }
+        .padding()
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(10)
+    }
+
+    private var flightTimeRow: some View {
+        HStack {
+            VStack(alignment: .leading) {
+                Text(viewModel.flight.departureAirport)
+                    .font(.headline)
+                Text(formatDate(viewModel.flight.departureTime))
+                    .font(.subheadline)
+            }
+
+            Spacer()
+
+            Image(systemName: "airplane")
+                .foregroundColor(.blue)
+
+            Spacer()
+
+            VStack(alignment: .trailing) {
+                Text(viewModel.flight.arrivalAirport)
+                    .font(.headline)
+                Text(formatDate(viewModel.flight.arrivalTime))
+                    .font(.subheadline)
+            }
         }
     }
-    
+
+    private var flightDurationRow: some View {
+        HStack {
+            Image(systemName: "clock")
+            Text("Duration: \(formatDuration(TimeInterval(viewModel.flight.duration * 60)))")
+        }
+    }
+
+    private var flightClassRow: some View {
+        HStack {
+            Image(systemName: "seat.fill")
+            Text("Class: \(viewModel.flight.travelClass)")
+        }
+    }
+
+    private var userQueryInput: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Ask a question about your flight:")
+                .font(.headline)
+            TextField("Enter your query here", text: $userQuery, onCommit: submitQuery)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .disabled(isLoading)
+
+            if isLoading {
+                ProgressView()
+            }
+
+            if let errorMessage = errorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+            }
+        }
+    }
+
     private func submitQuery() {
         guard !userQuery.trimmingCharacters(in: .whitespaces).isEmpty else { return }
         isLoading = true
         errorMessage = nil
         viewModel.processUserQuery(userQuery) { success, error in
             DispatchQueue.main.async {
-                isLoading = false
-                if let error = error {
-                    errorMessage = error.localizedDescription
+                self.isLoading = false
+                if !success {
+                    self.errorMessage = error?.localizedDescription ?? "An error occurred"
                 }
-                userQuery = ""
+                self.userQuery = ""
             }
         }
     }
-    
-    private func formattedDate(_ date: Date) -> String {
+
+    private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
+        formatter.dateFormat = "HH:mm, MMM d"
         return formatter.string(from: date)
     }
-    
-    private func formattedTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
-    }
-    
+
     private func formatDuration(_ duration: TimeInterval) -> String {
         let hours = Int(duration / 3600)
-        let minutes = Int((duration.truncatingRemainder(dividingBy: 3600)) / 60)
+        let minutes = Int((duration.truncatingRemainder(dividingBy: 3600))/60)
         return "\(hours)h \(minutes)m"
     }
 }

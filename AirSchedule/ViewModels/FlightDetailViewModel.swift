@@ -34,18 +34,19 @@ class FlightDetailViewModel: ObservableObject {
     func executeActionPlan(_ actionPlan: ActionPlan, completion: @escaping (Bool, Error?) -> Void) {
         context = ["flight": flight] // Set the flight in the context
         uiComponents = [] // Reset UI components
-        let actionGroup = DispatchGroup()
 
         // Handle direct flight information retrieval or complex actions
-        if actionPlan.actions.isEmpty {
+        if actionPlan.actions == nil || actionPlan.actions!.isEmpty {
             self.uiComponents = actionPlan.uiComponents
             self.updateUI()
             completion(true, nil)
             return
         }
 
+        let actionGroup = DispatchGroup()
+
         // Handle complex actions
-        for action in actionPlan.actions {
+        for action in actionPlan.actions! {
             print("Processing action: API=\(action.api), Method=\(action.method)")
             actionGroup.enter()
             ActionExecutor.shared.executeAction(action, context: &context) { result in
