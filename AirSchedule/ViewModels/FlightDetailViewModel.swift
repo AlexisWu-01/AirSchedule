@@ -3,7 +3,7 @@ import SwiftUI
 class FlightDetailViewModel: ObservableObject {
     @Published var flight: Flight
     @Published var dynamicContent: AnyView = AnyView(EmptyView())
-    @Published var uiComponents: [String] = []
+    @Published var uiComponents: [UIComponent] = []
     @Published var context: [String: Any] = [:]
 
     init(flight: Flight) {
@@ -11,74 +11,97 @@ class FlightDetailViewModel: ObservableObject {
     }
 
     func processUserQuery(_ query: String, completion: @escaping (Bool, Error?) -> Void) {
-        LLMService.shared.parseUserQuery(query) { [weak self] result in
+        LLMService.shared.parseUserQuery(query, forFlight: flight) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let actionPlan):
                     self?.executeActionPlan(actionPlan, completion: completion)
                 case .failure(let error):
                     print("Error parsing user query: \(error.localizedDescription)")
+                    self?.handleLLMError(error)
                     completion(false, error)
                 }
             }
         }
     }
 
-    func executeActionPlan(_ actionPlan: ActionPlan, completion: @escaping (Bool, Error?) -> Void) {
-        context = [:] // Reset context for new action plan
-        let group = DispatchGroup()
+    func handleLLMError(_ error: Error) {
+        let errorComponent = UIComponent(type: "error", properties: ["text": AnyCodable(error.localizedDescription)])
+        self.uiComponents = [errorComponent]
+        self.updateUI()
+    }
 
+    func executeActionPlan(_ actionPlan: ActionPlan, completion: @escaping (Bool, Error?) -> Void) {
+        context = ["flight": flight] // Set the flight in the context
+        uiComponents = [] // Reset UI components
+        let actionGroup = DispatchGroup()
+
+        // Handle direct flight information retrieval or complex actions
+        if actionPlan.actions.isEmpty {
+            self.uiComponents = actionPlan.uiComponents
+            self.updateUI()
+            completion(true, nil)
+            return
+        }
+
+        // Handle complex actions
         for action in actionPlan.actions {
-            group.enter()
-            executeAction(action) { result in
+            print("Processing action: API=\(action.api), Method=\(action.method)")
+            actionGroup.enter()
+            ActionExecutor.shared.executeAction(action, context: &context) { result in
                 switch result {
-                case .success:
-                    group.leave()
+                case .success(let updatedContext):
+                    self.context.merge(updatedContext) { (_, new) in new }
+                    print("Action executed successfully. Updated context: \(updatedContext)")
                 case .failure(let error):
                     print("Error executing action: \(error.localizedDescription)")
-                    group.leave()
+                    self.uiComponents.append(UIComponent(type: "error", properties: ["text": AnyCodable(error.localizedDescription)]))
                 }
+                actionGroup.leave()
             }
         }
 
-        group.notify(queue: .main) { [weak self] in
+        actionGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
-            self.uiComponents = actionPlan.uiComponents
+            if self.uiComponents.isEmpty {
+                if !actionPlan.uiComponents.isEmpty {
+                    self.uiComponents = actionPlan.uiComponents
+                } else {
+                    let newComponents = self.generateUIComponents(from: self.context)
+                    if !newComponents.isEmpty {
+                        self.uiComponents = newComponents
+                    } else {
+                        let defaultComponent = UIComponent(type: "text", properties: ["content": AnyCodable("No information available.")])
+                        self.uiComponents = [defaultComponent]
+                    }
+                }
+            }
+            print("Updating UI with components: \(self.uiComponents)")
             self.updateUI()
             completion(true, nil)
         }
     }
 
-    func executeAction(_ action: Action, completion: @escaping (Result<Void, Error>) -> Void) {
-        switch action.api {
-        case "get_flight_arrival_time":
-            let arrivalTime = flight.arrivalTime
-            context["arrival_time"] = arrivalTime
-            completion(.success(()))
-        case "get_meeting_details":
-            // Implement this method to fetch meeting details
-            // For now, we'll use mock data
-            let meetingTime = Date().addingTimeInterval(3600 * 3) // 3 hours from now
-            context["meeting_time"] = meetingTime
-            completion(.success(()))
-        case "calculate_travel_time":
-            // Implement this method to calculate travel time
-            // For now, we'll use a mock value
-            context["travel_time"] = 1800 // 30 minutes in seconds
-            completion(.success(()))
-        case "determine_availability":
-            if let arrivalTime = context["arrival_time"] as? Date,
-               let meetingTime = context["meeting_time"] as? Date,
-               let travelTime = context["travel_time"] as? TimeInterval {
-                let canMakeMeeting = arrivalTime.addingTimeInterval(travelTime) <= meetingTime
-                context["can_make_meeting"] = canMakeMeeting
-                completion(.success(()))
-            } else {
-                completion(.failure(NSError(domain: "Missing context data", code: -1, userInfo: nil)))
-            }
-        default:
-            completion(.failure(NSError(domain: "Unknown action", code: -1, userInfo: nil)))
+    private func generateUIComponents(from context: [String: Any]) -> [UIComponent] {
+        var components: [UIComponent] = []
+
+        if let content = context["content"] as? String {
+            components.append(UIComponent(type: "text", properties: ["content": AnyCodable(content)]))
         }
+
+        if let carbonEmissions = context["this_flight"] as? Int,
+           let typicalEmissions = context["typical_for_this_route"] as? Int,
+           let differencePercent = context["difference_percent"] as? Int {
+            let text = """
+            Carbon Emissions:
+            - This Flight: \(carbonEmissions) kg CO2
+            - Typical for this Route: \(typicalEmissions) kg CO2
+            - Difference: \(differencePercent)%
+            """
+            components.append(UIComponent(type: "text", properties: ["content": AnyCodable(text)]))
+        }
+
+        return components
     }
 
     func updateUI() {
@@ -86,6 +109,7 @@ class FlightDetailViewModel: ObservableObject {
             self.dynamicContent = AnyView(
                 DynamicUIRenderer(components: self.uiComponents, context: self.context)
             )
+            self.objectWillChange.send()
         }
     }
 }

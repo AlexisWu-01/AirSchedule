@@ -54,6 +54,9 @@ struct FlightDetailView: View {
                     Text("Carbon emissions data not available.")
                 }
                 
+                // Dynamic UI Components
+                viewModel.dynamicContent
+                
                 // User Query Input
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Ask a question about your flight:")
@@ -62,74 +65,68 @@ struct FlightDetailView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     Button(action: submitQuery) {
                         Text("Submit")
-                            .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(PrimaryButtonStyle())
-                    .disabled(userQuery.isEmpty || isLoading)
                 }
                 
-                // Loading Indicator
                 if isLoading {
                     ProgressView("Processing...")
+                        .padding()
                 }
                 
-                // Error Message
-                if let errorMessage = errorMessage {
-                    Text(errorMessage)
+                if let error = errorMessage {
+                    Text("Error: \(error)")
                         .foregroundColor(.red)
                         .padding()
-                        .background(Color.red.opacity(0.1))
-                        .cornerRadius(8)
                 }
-                
-                // Dynamic Content
-                DynamicUIRenderer(components: viewModel.uiComponents, context: viewModel.context)
-                    .transition(.opacity)
             }
             .padding()
         }
-        .navigationTitle("Flight Details")
     }
-
-    private func infoRow(_ title: String, _ value: String) -> some View {
+    
+    private func infoRow(_ label: String, _ value: String) -> some View {
         HStack {
-            Text(title)
-                .font(.headline)
+            Text(label)
+                .font(.subheadline)
+                .foregroundColor(.gray)
             Spacer()
             Text(value)
+                .font(.subheadline)
         }
     }
-
+    
     private func submitQuery() {
         guard !userQuery.trimmingCharacters(in: .whitespaces).isEmpty else { return }
         isLoading = true
         errorMessage = nil
         viewModel.processUserQuery(userQuery) { success, error in
-            isLoading = false
-            if let error = error {
-                errorMessage = error.localizedDescription
+            DispatchQueue.main.async {
+                isLoading = false
+                if let error = error {
+                    errorMessage = error.localizedDescription
+                }
+                userQuery = ""
             }
-            userQuery = ""
         }
     }
-
+    
     private func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
         return formatter.string(from: date)
     }
-
+    
     private func formattedTime(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .none
         formatter.timeStyle = .short
         return formatter.string(from: date)
     }
-
+    
     private func formatDuration(_ duration: TimeInterval) -> String {
-        let hours = Int(duration / 60)
-        let minutes = Int((duration.truncatingRemainder(dividingBy: 60)))
+        let hours = Int(duration / 3600)
+        let minutes = Int((duration.truncatingRemainder(dividingBy: 3600)) / 60)
         return "\(hours)h \(minutes)m"
     }
 }
