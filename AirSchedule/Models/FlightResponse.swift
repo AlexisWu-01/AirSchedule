@@ -60,4 +60,5 @@ struct AirportInfo: Codable {
     let name: String
     let id: String
     let time: String
+    let actual_time: String?
 }

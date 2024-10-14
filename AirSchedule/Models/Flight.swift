@@ -7,18 +7,18 @@
 
 import Foundation
 
-struct Flight: Identifiable {
+struct Flight: Identifiable, Codable {
     let id = UUID()
     let airline: String
     let airlineCode: String
     let flightNumber: String
     let departureTime: Date
     let arrivalTime: Date
+    let actualDepartureTime: Date
+    let actualArrivalTime: Date
     let departureAirport: String
     let arrivalAirport: String
     let price: Double
-    
-    // New properties
     let departureAirportName: String
     let arrivalAirportName: String
     let duration: Int
