@@ -3,6 +3,8 @@ import SwiftUI
 class FlightDetailViewModel: ObservableObject {
     @Published var flight: Flight
     @Published var dynamicContent: AnyView = AnyView(EmptyView())
+    @Published var uiComponents: [String] = []
+    @Published var context: [String: Any] = [:]
 
     init(flight: Flight) {
         self.flight = flight
@@ -13,9 +15,7 @@ class FlightDetailViewModel: ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let actionPlan):
-                    self?.executeActionPlan(actionPlan) { success, error in
-                        completion(success, error)
-                    }
+                    self?.executeActionPlan(actionPlan, completion: completion)
                 case .failure(let error):
                     print("Error parsing user query: \(error.localizedDescription)")
                     completion(false, error)
@@ -25,123 +25,67 @@ class FlightDetailViewModel: ObservableObject {
     }
 
     func executeActionPlan(_ actionPlan: ActionPlan, completion: @escaping (Bool, Error?) -> Void) {
-        var context = Context()
-        let actionGroup = DispatchGroup()
+        context = [:] // Reset context for new action plan
+        let group = DispatchGroup()
 
         for action in actionPlan.actions {
-            actionGroup.enter()
-            executeAction(action, context: context) { result in
-                defer { actionGroup.leave() }
+            group.enter()
+            executeAction(action) { result in
                 switch result {
-                case .success(let updatedContext):
-                    context = updatedContext
+                case .success:
+                    group.leave()
                 case .failure(let error):
-                    print("Error executing action \(action.action): \(error.localizedDescription)")
+                    print("Error executing action: \(error.localizedDescription)")
+                    group.leave()
                 }
             }
         }
 
-        actionGroup.notify(queue: .main) { [weak self] in
+        group.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
-            self.updateUI(with: context.data, components: actionPlan.uiComponents)
+            self.uiComponents = actionPlan.uiComponents
+            self.updateUI()
             completion(true, nil)
         }
     }
 
-    func executeAction(_ action: Action, context: Context, completion: @escaping (Result<Context, Error>) -> Void) {
-        var mutableContext = context
-        switch action.action {
+    func executeAction(_ action: Action, completion: @escaping (Result<Void, Error>) -> Void) {
+        switch action.api {
         case "get_flight_arrival_time":
             let arrivalTime = flight.arrivalTime
-            mutableContext.data["arrival_time"] = arrivalTime
-            completion(.success(mutableContext))
-
+            context["arrival_time"] = arrivalTime
+            completion(.success(()))
         case "get_meeting_details":
-            getMeetingDetails { result in
-                switch result {
-                case .success(let meeting):
-                    mutableContext.data["meeting_details"] = meeting
-                    completion(.success(mutableContext))
-                case .failure(let error):
-                    completion(.failure(error))
-                }
-            }
-
+            // Implement this method to fetch meeting details
+            // For now, we'll use mock data
+            let meetingTime = Date().addingTimeInterval(3600 * 3) // 3 hours from now
+            context["meeting_time"] = meetingTime
+            completion(.success(()))
         case "calculate_travel_time":
-            let arrivalAirport = flight.arrivalAirportName
-            if let meetingLocation = (mutableContext.data["meeting_details"] as? Meeting)?.location {
-                calculateTravelTime(from: arrivalAirport, to: meetingLocation) { result in
-                    switch result {
-                    case .success(let travelTime):
-                        mutableContext.data["travel_time"] = travelTime
-                        completion(.success(mutableContext))
-                    case .failure(let error):
-                        completion(.failure(error))
-                    }
-                }
-            } else {
-                completion(.failure(NSError(domain: "Missing data for travel time calculation", code: -1, userInfo: nil)))
-            }
-
+            // Implement this method to calculate travel time
+            // For now, we'll use a mock value
+            context["travel_time"] = 1800 // 30 minutes in seconds
+            completion(.success(()))
         case "determine_availability":
-            if let arrivalTime = mutableContext.data["arrival_time"] as? Date,
-               let travelTime = mutableContext.data["travel_time"] as? TimeInterval,
-               let meeting = mutableContext.data["meeting_details"] as? Meeting {
-                let arrivalPlusTravel = arrivalTime.addingTimeInterval(travelTime)
-                let timeDifference = meeting.startTime.timeIntervalSince(arrivalPlusTravel)
-                let canMakeMeeting = timeDifference >= 0
-                mutableContext.data["can_make_meeting"] = canMakeMeeting
-                mutableContext.data["time_difference"] = timeDifference
-                completion(.success(mutableContext))
+            if let arrivalTime = context["arrival_time"] as? Date,
+               let meetingTime = context["meeting_time"] as? Date,
+               let travelTime = context["travel_time"] as? TimeInterval {
+                let canMakeMeeting = arrivalTime.addingTimeInterval(travelTime) <= meetingTime
+                context["can_make_meeting"] = canMakeMeeting
+                completion(.success(()))
             } else {
-                completion(.failure(NSError(domain: "Missing data for availability determination", code: -1, userInfo: nil)))
+                completion(.failure(NSError(domain: "Missing context data", code: -1, userInfo: nil)))
             }
-
         default:
-            print("Unknown action: \(action.action)")
             completion(.failure(NSError(domain: "Unknown action", code: -1, userInfo: nil)))
         }
     }
 
-    func getMeetingDetails(completion: @escaping (Result<Meeting, Error>) -> Void) {
-        // Implement actual Calendar API integration here
-        // For demonstration, we'll use mock data
-        let meeting = Meeting(
-            title: "Team Meeting",
-            startTime: Date().addingTimeInterval(3600 * 3), // 3 hours from now
-            location: "123 Main St, City"
-        )
-        completion(.success(meeting))
-    }
-
-    func calculateTravelTime(from: String, to: String, completion: @escaping (Result<TimeInterval, Error>) -> Void) {
-        // Implement actual Maps API integration here
-        // For demonstration, we'll use mock data
-        let travelTime: TimeInterval = 3600 // 1 hour in seconds
-        completion(.success(travelTime))
-    }
-
-    func updateUI(with context: [String: Any], components: [String]) {
-        if components.contains("meeting_availability_result") {
-            if let canMakeMeeting = context["can_make_meeting"] as? Bool,
-               let timeDifference = context["time_difference"] as? TimeInterval,
-               let meeting = context["meeting_details"] as? Meeting {
-                dynamicContent = AnyView(
-                    MeetingAvailabilityView(
-                        canMakeIt: canMakeMeeting,
-                        timeDifference: timeDifference,
-                        meeting: meeting
-                    )
-                )
-            } else {
-                dynamicContent = AnyView(
-                    Text("Unable to determine meeting availability.")
-                        .foregroundColor(.red)
-                        .padding()
-                )
-            }
+    func updateUI() {
+        DispatchQueue.main.async {
+            self.dynamicContent = AnyView(
+                DynamicUIRenderer(components: self.uiComponents, context: self.context)
+            )
         }
-
-        // Add more UI update logic for other components as needed
     }
 }

@@ -23,8 +23,14 @@
 		7BE10EB82CBD145D00E5A3DB /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EB72CBD145A00E5A3DB /* LLMService.swift */; };
 		7BE10EBA2CBD151500E5A3DB /* LLMResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EB92CBD151100E5A3DB /* LLMResponse.swift */; };
 		7BE10EBC2CBD855200E5A3DB /* ActionPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EBB2CBD855000E5A3DB /* ActionPlan.swift */; };
-		7BE10EBE2CBD85A900E5A3DB /* MeetingAvailabilityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EBD2CBD85A400E5A3DB /* MeetingAvailabilityView.swift */; };
 		7BE10EC02CBD890900E5A3DB /* Supporting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EBF2CBD88E900E5A3DB /* Supporting.swift */; };
+		7BE10ED02CBD99BC00E5A3DB /* APIKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10ECF2CBD99BA00E5A3DB /* APIKeys.swift */; };
+		7BE10ED22CBD9C0400E5A3DB /* keys.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7BE10ED12CBD9A9200E5A3DB /* keys.plist */; };
+		7BE10ED42CBDA0D800E5A3DB /* IntentRecognitionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10ED32CBDA0D100E5A3DB /* IntentRecognitionService.swift */; };
+		7BE10ED62CBDA0F200E5A3DB /* ActionPlanningService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10ED52CBDA0EE00E5A3DB /* ActionPlanningService.swift */; };
+		7BE10ED82CBDA11100E5A3DB /* ResponseGenerationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10ED72CBDA10D00E5A3DB /* ResponseGenerationService.swift */; };
+		7BE10EDA2CBDA14A00E5A3DB /* ActionExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10ED92CBDA14100E5A3DB /* ActionExecutor.swift */; };
+		7BE10EDC2CBDA17000E5A3DB /* DynamicUIRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10EDB2CBDA16500E5A3DB /* DynamicUIRenderer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,8 +51,14 @@
 		7BE10EB72CBD145A00E5A3DB /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
 		7BE10EB92CBD151100E5A3DB /* LLMResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMResponse.swift; sourceTree = "<group>"; };
 		7BE10EBB2CBD855000E5A3DB /* ActionPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionPlan.swift; sourceTree = "<group>"; };
-		7BE10EBD2CBD85A400E5A3DB /* MeetingAvailabilityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingAvailabilityView.swift; sourceTree = "<group>"; };
 		7BE10EBF2CBD88E900E5A3DB /* Supporting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Supporting.swift; sourceTree = "<group>"; };
+		7BE10ECF2CBD99BA00E5A3DB /* APIKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeys.swift; sourceTree = "<group>"; };
+		7BE10ED12CBD9A9200E5A3DB /* keys.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = keys.plist; sourceTree = "<group>"; };
+		7BE10ED32CBDA0D100E5A3DB /* IntentRecognitionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentRecognitionService.swift; sourceTree = "<group>"; };
+		7BE10ED52CBDA0EE00E5A3DB /* ActionPlanningService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionPlanningService.swift; sourceTree = "<group>"; };
+		7BE10ED72CBDA10D00E5A3DB /* ResponseGenerationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseGenerationService.swift; sourceTree = "<group>"; };
+		7BE10ED92CBDA14100E5A3DB /* ActionExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionExecutor.swift; sourceTree = "<group>"; };
+		7BE10EDB2CBDA16500E5A3DB /* DynamicUIRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicUIRenderer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +75,7 @@
 		7BE10E5B2CBCCCFF00E5A3DB = {
 			isa = PBXGroup;
 			children = (
+				7BE10ED12CBD9A9200E5A3DB /* keys.plist */,
 				7BE10E982CBCD21400E5A3DB /* AirSchedule */,
 				7BE10E652CBCCCFF00E5A3DB /* Products */,
 			);
@@ -87,6 +100,7 @@
 		7BE10E982CBCD21400E5A3DB /* AirSchedule */ = {
 			isa = PBXGroup;
 			children = (
+				7BE10ECF2CBD99BA00E5A3DB /* APIKeys.swift */,
 				7BE10EA52CBCD84A00E5A3DB /* Services */,
 				7BE10EA42CBCD74C00E5A3DB /* Views */,
 				7BE10EA32CBCD73400E5A3DB /* ViewModels */,
@@ -102,6 +116,7 @@
 		7BE10E9E2CBCD21900E5A3DB /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				7BE10ED92CBDA14100E5A3DB /* ActionExecutor.swift */,
 				7BE10EA92CBCD99200E5A3DB /* FlightResponse.swift */,
 				7BE10EBB2CBD855000E5A3DB /* ActionPlan.swift */,
 				7BE10EBF2CBD88E900E5A3DB /* Supporting.swift */,
@@ -114,6 +129,7 @@
 		7BE10EA32CBCD73400E5A3DB /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				7BE10EDB2CBDA16500E5A3DB /* DynamicUIRenderer.swift */,
 				7BE10EB12CBCDC3500E5A3DB /* FlightDetailViewModel.swift */,
 				7BE10EAB2CBCD9F400E5A3DB /* FlightListViewModel.swift */,
 			);
@@ -124,7 +140,6 @@
 			isa = PBXGroup;
 			children = (
 				7BE10EB32CBCECFC00E5A3DB /* SearchBar.swift */,
-				7BE10EBD2CBD85A400E5A3DB /* MeetingAvailabilityView.swift */,
 				7BE10EAF2CBCDA9D00E5A3DB /* FlightDetailView.swift */,
 				7BE10EAD2CBCDA0A00E5A3DB /* FlightListView.swift */,
 			);
@@ -134,6 +149,9 @@
 		7BE10EA52CBCD84A00E5A3DB /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				7BE10ED72CBDA10D00E5A3DB /* ResponseGenerationService.swift */,
+				7BE10ED52CBDA0EE00E5A3DB /* ActionPlanningService.swift */,
+				7BE10ED32CBDA0D100E5A3DB /* IntentRecognitionService.swift */,
 				7BE10EB72CBD145A00E5A3DB /* LLMService.swift */,
 				7BE10EB52CBD0B5100E5A3DB /* CalendarService.swift */,
 				7BE10EA62CBCD85A00E5A3DB /* FlightService.swift */,
@@ -202,6 +220,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7BE10ED22CBD9C0400E5A3DB /* keys.plist in Resources */,
 				7BE10E9B2CBCD21400E5A3DB /* Preview Assets.xcassets in Resources */,
 				7BE10E9C2CBCD21400E5A3DB /* Assets.xcassets in Resources */,
 				7BE10E9D2CBCD21400E5A3DB /* thought_process.md in Resources */,
@@ -217,18 +236,23 @@
 			files = (
 				7BE10EAA2CBCD99900E5A3DB /* FlightResponse.swift in Sources */,
 				7BE10EBA2CBD151500E5A3DB /* LLMResponse.swift in Sources */,
+				7BE10ED82CBDA11100E5A3DB /* ResponseGenerationService.swift in Sources */,
+				7BE10ED42CBDA0D800E5A3DB /* IntentRecognitionService.swift in Sources */,
 				7BE10EA02CBCD23600E5A3DB /* Flight.swift in Sources */,
 				7BE10EB02CBCDAA100E5A3DB /* FlightDetailView.swift in Sources */,
 				7BE10EB62CBD0B5500E5A3DB /* CalendarService.swift in Sources */,
+				7BE10ED62CBDA0F200E5A3DB /* ActionPlanningService.swift in Sources */,
 				7BE10EB82CBD145D00E5A3DB /* LLMService.swift in Sources */,
 				7BE10EB22CBCDC3900E5A3DB /* FlightDetailViewModel.swift in Sources */,
 				7BE10EBC2CBD855200E5A3DB /* ActionPlan.swift in Sources */,
 				7BE10E992CBCD21400E5A3DB /* AirScheduleApp.swift in Sources */,
+				7BE10EDA2CBDA14A00E5A3DB /* ActionExecutor.swift in Sources */,
 				7BE10EAE2CBCDA1000E5A3DB /* FlightListView.swift in Sources */,
-				7BE10EBE2CBD85A900E5A3DB /* MeetingAvailabilityView.swift in Sources */,
+				7BE10EDC2CBDA17000E5A3DB /* DynamicUIRenderer.swift in Sources */,
 				7BE10EB42CBCED0000E5A3DB /* SearchBar.swift in Sources */,
 				7BE10EAC2CBCD9F600E5A3DB /* FlightListViewModel.swift in Sources */,
 				7BE10EA72CBCD85E00E5A3DB /* FlightService.swift in Sources */,
+				7BE10ED02CBD99BC00E5A3DB /* APIKeys.swift in Sources */,
 				7BE10EC02CBD890900E5A3DB /* Supporting.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

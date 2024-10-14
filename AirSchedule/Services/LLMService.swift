@@ -8,7 +8,7 @@ import Foundation
 
 class LLMService {
     static let shared = LLMService()
-    private let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? ""
+    private let apiKey = APIKeys.openAIAPIKey
 
     private init() {}
 
@@ -76,17 +76,21 @@ class LLMService {
             }
 
             do {
+                // Print raw response for debugging
+                if let rawResponse = String(data: data, encoding: .utf8) {
+                    print("Raw API Response: \(rawResponse)")
+                }
+
                 // Decode the API response into ChatAPIResponse
                 let decoder = JSONDecoder()
                 let apiResponse = try decoder.decode(ChatAPIResponse.self, from: data)
 
                 // Extract the generated content from the message
                 if let content = apiResponse.choices.first?.message.content {
-                    // Clean up the response text
                     let cleanedResponse = content.trimmingCharacters(in: .whitespacesAndNewlines)
-                    // Convert the cleaned text into Data
+                    print("Cleaned Response: \(cleanedResponse)")
+                    
                     if let responseData = cleanedResponse.data(using: .utf8) {
-                        // Decode the ActionPlan from the responseData
                         let actionPlan = try decoder.decode(ActionPlan.self, from: responseData)
                         completion(.success(actionPlan))
                     } else {
@@ -98,7 +102,7 @@ class LLMService {
                     completion(.failure(NSError(domain: "No content", code: -1, userInfo: nil)))
                 }
             } catch {
-                print("Error decoding API response: \(error.localizedDescription)")
+                print("Error decoding API response: \(error)")
                 completion(.failure(error))
             }
         }
