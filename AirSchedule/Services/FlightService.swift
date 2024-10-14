@@ -6,10 +6,12 @@
 //
 import Foundation
 
+
+
 class FlightService {
     static let shared = FlightService()
-    private let apiKey = "842ec8cb785542d4137a665dde074a66f3e9af8afd94e5cea47137fd3bd13d5e"
     private let baseURL = "https://serpapi.com/search?engine=google_flights"
+    private let apiKey = APIKeys.serpAPIKey
     private init() {}
 
     func fetchFlights(from departureAirport: String, to arrivalAirport: String, on date: Date, completion: @escaping (Result<[Flight], Error>) -> Void) {

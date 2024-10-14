@@ -8,7 +8,7 @@ import Foundation
 
 class LLMService {
     static let shared = LLMService()
-    private let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? ""
+    private let apiKey = APIKeys.openAIAPIKey
 
     private init() {}
 
