@@ -1,3 +1,10 @@
+//
+//  FlightDetailViewModel.swift
+//  AirSchedule
+//
+//  Created by Xinyi WU on 10/14/24.
+//
+
 import SwiftUI
 import Combine
 
@@ -13,7 +20,14 @@ class FlightDetailViewModel: ObservableObject {
     }
     
     private func updateUI() {
-        dynamicContent = AnyView(DynamicUIRenderer(uiComponents: uiComponents))
+        DispatchQueue.main.async {
+            print("Debug: Updating UI with \(self.uiComponents.count) components")
+            for (index, component) in self.uiComponents.enumerated() {
+                print("Debug: Component \(index) - Type: \(component.type)")
+            }
+            self.dynamicContent = AnyView(DynamicUIRenderer(uiComponents: self.uiComponents))
+            print("Debug: DynamicContent updated")
+        }
     }
 
     func processUserQuery(_ query: String, completion: @escaping (Bool, Error?) -> Void) {
@@ -43,15 +57,14 @@ class FlightDetailViewModel: ObservableObject {
         var contextAny: [String: Any] = ["flight": flight]
         DispatchQueue.main.async {
             self.uiComponents = actionPlan.uiComponents ?? []
+            self.updateUI()
         }
         executeActionsSequentially(actions: actionPlan.actions ?? [], index: 0, context: contextAny) { success, error, updatedContext in
             DispatchQueue.main.async {
                 self.context = updatedContext.mapValues { AnyCodable($0) }
+                self.updateUI()
                 completion(success, error)
             }
-        }
-        DispatchQueue.main.async {
-            self.updateUI()
         }
     }
 

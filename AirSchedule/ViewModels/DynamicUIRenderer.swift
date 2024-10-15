@@ -1,3 +1,10 @@
+//
+//  DynamicUIRenderer.swift
+//  AirSchedule
+//
+//  Created by Xinyi WU on 10/14/24.
+//
+
 import SwiftUI
 import MapKit
 
@@ -15,22 +22,31 @@ struct DynamicUIRenderer: View {
     let uiComponents: [UIComponent]
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                ForEach(uiComponents, id: \.id) { component in
-                    renderComponent(component)
-                }
+        VStack(spacing: 20) {
+            ForEach(uiComponents.indices, id: \.self) { index in
+                renderComponent(uiComponents[index], index: index)
             }
-            .padding()
+        }
+        .padding()
+        .onAppear {
+            print("Debug: DynamicUIRenderer appeared with \(uiComponents.count) components")
         }
     }
     
     @ViewBuilder
-    private func renderComponent(_ component: UIComponent) -> some View {
+    private func renderComponent(_ component: UIComponent, index: Int) -> some View {
         switch component.type {
         case "text":
             if let text = component.properties["text"]?.value as? String {
                 Text(text)
+                    .onAppear { print("Debug: Rendering text component \(index): \(text)") }
+            } else if let content = component.properties["content"]?.value as? String {
+                Text(content)
+                    .onAppear { print("Debug: Rendering text component \(index): \(content)") }
+            } else {
+                Text("Invalid text component")
+                    .foregroundColor(.red)
+                    .onAppear { print("Debug: Invalid text component \(index)") }
             }
         case "map":
             if let fromLocation = component.properties["fromLocation"]?.value as? CLLocationCoordinate2D,
@@ -38,14 +54,22 @@ struct DynamicUIRenderer: View {
                 MapView(fromCoordinate: fromLocation, toCoordinate: toLocation)
                     .frame(height: 300)
                     .cornerRadius(10)
+                    .onAppear { print("Debug: Rendering map component \(index)") }
+            } else {
+                Text("Invalid map component")
+                    .foregroundColor(.red)
+                    .onAppear { print("Debug: Invalid map component \(index)") }
             }
         case "error":
             if let errorText = component.properties["text"]?.value as? String {
                 Text(errorText)
                     .foregroundColor(.red)
+                    .onAppear { print("Debug: Rendering error component \(index): \(errorText)") }
             }
         default:
-            EmptyView()
+            Text("Unknown component type: \(component.type)")
+                .foregroundColor(.orange)
+                .onAppear { print("Debug: Unknown component type \(index): \(component.type)") }
         }
     }
 }
