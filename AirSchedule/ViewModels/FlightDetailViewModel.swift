@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 class FlightDetailViewModel: ObservableObject {
     @Published var flight: Flight
@@ -15,10 +16,6 @@ class FlightDetailViewModel: ObservableObject {
         dynamicContent = AnyView(DynamicUIRenderer(uiComponents: uiComponents))
     }
 
-    /// Processes the user's query by parsing it and executing the resulting action plan.
-    /// - Parameters:
-    ///   - query: The user's natural language query.
-    ///   - completion: Completion handler indicating success or failure.
     func processUserQuery(_ query: String, completion: @escaping (Bool, Error?) -> Void) {
         LLMService.shared.parseUserQuery(query, forFlight: flight) { [weak self] result in
             guard let self = self else { return }
@@ -35,51 +32,66 @@ class FlightDetailViewModel: ObservableObject {
         }
     }
 
-    /// Handles errors encountered during LLM parsing.
-    /// - Parameter error: The error to handle.
     private func handleLLMError(_ error: Error) {
         let errorComponent = UIComponent(type: "error", properties: ["text": AnyCodable(error.localizedDescription)])
-        self.uiComponents = [errorComponent]
-        self.updateUI()
+        DispatchQueue.main.async {
+            self.uiComponents = [errorComponent]
+        }
     }
 
-    private func executeActionPlan(_ actionPlan: ActionPlan, completion: @escaping (Bool, Error?) -> Void) {
+    func executeActionPlan(_ actionPlan: ActionPlan, completion: @escaping (Bool, Error?) -> Void) {
         var contextAny: [String: Any] = ["flight": flight]
-        uiComponents = actionPlan.uiComponents ?? []
-        let actionGroup = DispatchGroup()
-
-        for action in actionPlan.actions ?? [] {
-            print("Processing action: API=\(action.api), Method=\(action.method)")
-            actionGroup.enter()
-            ActionExecutor.shared.executeAction(action, context: contextAny) { [weak self] result in
-                guard let self = self else { return }
-                switch result {
-                case .success(let updatedContext):
-                    DispatchQueue.main.async {
-                        // Update the context with the new information
-                        for (key, value) in updatedContext {
-                            self.context[key] = value
-                            contextAny[key] = value.value
-                        }
-                        // ... rest of your existing code ...
-                    }
-                case .failure(let error):
-                    print("Error executing action: \(error.localizedDescription)")
-                    DispatchQueue.main.async {
-                        self.uiComponents.append(UIComponent(type: "error", properties: ["text": AnyCodable(error.localizedDescription)]))
-                        self.updateUI()
-                    }
-                }
-                actionGroup.leave()
+        DispatchQueue.main.async {
+            self.uiComponents = actionPlan.uiComponents ?? []
+        }
+        executeActionsSequentially(actions: actionPlan.actions ?? [], index: 0, context: contextAny) { success, error, updatedContext in
+            DispatchQueue.main.async {
+                self.context = updatedContext.mapValues { AnyCodable($0) }
+                completion(success, error)
             }
         }
-
-        actionGroup.notify(queue: .main) {
-            print("Updating UI with components: \(self.uiComponents)")
+        DispatchQueue.main.async {
             self.updateUI()
-            completion(true, nil)
         }
     }
+
+    private func executeActionsSequentially(actions: [Action], index: Int, context: [String: Any], completion: @escaping (Bool, Error?, [String: Any]) -> Void) {
+        if index >= actions.count {
+            completion(true, nil, context)
+            return
+        }
+        
+        let action = actions[index]
+        print("Processing action: API=\(action.api), Method=\(action.method)")
+        
+        ActionExecutor.shared.executeAction(action, context: context) { [weak self] result in
+            guard let self = self else {
+                completion(false, NSError(domain: "Self is nil", code: -1, userInfo: nil), context)
+                return
+            }
+            
+            switch result {
+            case .success(let updatedContext):
+                var newContext = context
+                for (key, value) in updatedContext {
+                    newContext[key] = value.value
+                }
+                DispatchQueue.main.async {
+                    self.context = updatedContext
+                }
+                // Proceed to the next action
+                self.executeActionsSequentially(actions: actions, index: index + 1, context: newContext, completion: completion)
+                
+            case .failure(let error):
+                print("Error executing action: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.uiComponents.append(UIComponent(type: "error", properties: ["text": AnyCodable(error.localizedDescription)]))
+                }
+                completion(false, error, context)
+            }
+        }
+    }
+
     private func formatTravelTime(_ seconds: Double) -> String {
         let minutes = Int(seconds) / 60
         let hours = minutes / 60

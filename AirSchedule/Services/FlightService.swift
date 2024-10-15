@@ -122,4 +122,5 @@ enum APIError: Error {
     case noData
     case unknownAPI
     case invalidParameters
+    case unknown
 }

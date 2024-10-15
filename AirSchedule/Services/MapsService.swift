@@ -13,7 +13,7 @@ class MapsService {
     
     private init() {}
     
-    func getDirections(from: String, to: String, arrivalTime: Date, completion: @escaping (Result<(MKRoute, TimeInterval), Error>) -> Void) {
+    func getDirections(from: String, to: String, arrivalTime: Date, completion: @escaping (Result<(MKRoute, TimeInterval, CLLocationCoordinate2D, CLLocationCoordinate2D), Error>) -> Void) {
         print("Debug: Entering getDirections with from: \(from), to: \(to), arrivalTime: \(arrivalTime)")
         let geocoder = CLGeocoder()
         let group = DispatchGroup()
@@ -22,15 +22,29 @@ class MapsService {
         var geocodingError: Error?
         
         group.enter()
-        geocoder.geocodeAddressString(from) { placemarks, error in
-            defer { group.leave() }
-            if let error = error {
-                print("Debug: Error geocoding 'from' address: \(error.localizedDescription)")
-                geocodingError = error
-                return
+        if from.count == 3 { // Assuming it's an airport code
+            getAirportCoordinate(for: from) { result in
+                defer { group.leave() }
+                switch result {
+                case .success(let coordinate):
+                    sourceCoordinate = coordinate
+                    print("Debug: 'From' coordinate (airport): \(String(describing: sourceCoordinate))")
+                case .failure(let error):
+                    geocodingError = error
+                    print("Debug: Error getting airport coordinate: \(error.localizedDescription)")
+                }
             }
-            sourceCoordinate = placemarks?.first?.location?.coordinate
-            print("Debug: 'From' coordinate: \(String(describing: sourceCoordinate))")
+        } else {
+            geocoder.geocodeAddressString(from) { placemarks, error in
+                defer { group.leave() }
+                if let error = error {
+                    print("Debug: Error geocoding 'from' address: \(error.localizedDescription)")
+                    geocodingError = error
+                    return
+                }
+                sourceCoordinate = placemarks?.first?.location?.coordinate
+                print("Debug: 'From' coordinate: \(String(describing: sourceCoordinate))")
+            }
         }
         
         group.enter()
@@ -79,8 +93,19 @@ class MapsService {
                 }
                 
                 print("Debug: Route calculated successfully. Travel time: \(route.expectedTravelTime)")
-                completion(.success((route, route.expectedTravelTime)))
+                completion(.success((route, route.expectedTravelTime, sourceCoordinate, destinationCoordinate)))
             }
+        }
+    }
+    
+    private func getAirportCoordinate(for code: String, completion: @escaping (Result<CLLocationCoordinate2D, Error>) -> Void) {
+        // In a real app, you would fetch this from a database or API
+        // For this example, we'll hardcode SFO's coordinates
+        if code == "SFO" {
+            let coordinate = CLLocationCoordinate2D(latitude: 37.6188, longitude: -122.3758)
+            completion(.success(coordinate))
+        } else {
+            completion(.failure(APIError.invalidParameters))
         }
     }
 }
