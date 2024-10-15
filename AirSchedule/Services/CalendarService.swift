@@ -11,22 +11,257 @@ import EventKit
 class CalendarService {
     static let shared = CalendarService()
     private let eventStore = EKEventStore()
+    private let llmService = LLMService.shared
     
     private init() {}
     
-    func requestAccess(completion: @escaping (Bool, Error?) -> Void) {
-        eventStore.requestAccess(to: .event) { (granted, error) in
-            completion(granted, error)
+    /// Checks the authorization status for accessing calendar events.
+    /// - Parameter completion: A closure that receives a Boolean indicating whether access is granted.
+    func checkAuthorizationStatus(completion: @escaping (Bool) -> Void) {
+        if #available(iOS 17.0, *) {
+            eventStore.requestFullAccessToEvents { granted, error in
+                if let error = error {
+                    print("Error requesting full access to events: \(error.localizedDescription)")
+                    completion(false)
+                } else {
+                    completion(granted)
+                }
+            }
+        } else {
+            let status = EKEventStore.authorizationStatus(for: .event)
+            switch status {
+            case .authorized:
+                completion(true)
+            case .notDetermined:
+                requestAccess { granted, _ in
+                    completion(granted)
+                }
+            case .restricted, .denied:
+                completion(false)
+            @unknown default:
+                completion(false)
+            }
         }
     }
     
-    func fetchEvents(for date: Date, completion: @escaping ([EKEvent]) -> Void) {
+    /// Requests access to calendar events.
+    /// - Parameter completion: A closure that receives a Boolean indicating whether access is granted and an optional error.
+    private func requestAccess(completion: @escaping (Bool, Error?) -> Void) {
+        if #available(iOS 17.0, *) {
+            eventStore.requestFullAccessToEvents(completion: completion)
+        } else {
+            eventStore.requestAccess(to: .event, completion: completion)
+        }
+    }
+    
+    /// Fetches all meetings (events) for a specific date.
+    /// - Parameters:
+    ///   - date: The date for which to fetch meetings.
+    ///   - completion: A closure that receives an array of EKEvent objects or an error.
+    func fetchMeetings(for date: Date, completion: @escaping ([EKEvent]?, Error?) -> Void) {
         let calendar = Calendar.current
-        let startDate = calendar.startOfDay(for: date)
-        let endDate = calendar.date(byAdding: .day, value: 1, to: startDate)!
+        guard let startDate = calendar.date(bySettingHour: 0, minute: 0, second: 0, of: date),
+              let endDate = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: date) else {
+            print("Error: Invalid date range for fetching meetings")
+            completion(nil, NSError(domain: "Invalid date", code: -1, userInfo: nil))
+            return
+        }
         
+        print("Fetching meetings for date range: \(startDate) to \(endDate)")
         let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil)
         let events = eventStore.events(matching: predicate)
-        completion(events)
+        print("Found \(events.count) events")
+        completion(events, nil)
+    }
+    
+    /// Checks availability by retrieving all events for the day of flight arrival.
+    /// - Parameters:
+    ///   - flightArrivalTime: The arrival time of the flight.
+    ///   - context: The current context to be updated.
+    ///   - completion: A closure that receives a Result containing an array of event details or an error.
+    func checkAvailability(
+        flightArrivalTime: Date,
+        context: [String: AnyCodable],
+        completion: @escaping (Result<([String: AnyCodable], [[String: AnyCodable]]), Error>) -> Void
+    ) {
+        print("Checking availability for flight arrival time: \(flightArrivalTime)")
+        checkAuthorizationStatus { authorized in
+            print("Calendar authorization status: \(authorized)")
+            if authorized {
+                let flightDate = Calendar.current.startOfDay(for: flightArrivalTime)
+                self.fetchMeetings(for: flightDate) { events, error in
+                    if let error = error {
+                        print("Error fetching meetings: \(error.localizedDescription)")
+                        completion(.failure(error))
+                        return
+                    }
+                    
+                    guard let events = events, !events.isEmpty else {
+                        print("No events found on the day of flight arrival.")
+                        completion(.success((context, []))) // Return the current context and an empty array indicating no events
+                        return
+                    }
+                    
+                    print("Processing \(events.count) events")
+                    // Map EKEvent objects to dictionaries with relevant details
+                    let eventDetails = events.map { event -> [String: AnyCodable] in
+                        return [
+                            "title": AnyCodable(event.title),
+                            "location": AnyCodable(event.location ?? "No Location"),
+                            "startDate": AnyCodable(event.startDate),
+                            "endDate": AnyCodable(event.endDate)
+                        ]
+                    }
+                    
+                    print("Availability result: \(eventDetails)")
+                    completion(.success((context, eventDetails)))
+                }
+            } else {
+                print("Calendar access not authorized")
+                completion(.failure(NSError(domain: "Calendar access not authorized", code: -1, userInfo: nil)))
+            }
+        }
+    }
+    
+    /// Converts a date string to a Date object using ISO8601 format.
+    /// - Parameter dateString: The date string to convert.
+    /// - Returns: A Date object if conversion is successful, otherwise nil.
+    private func dateFromString(_ dateString: String?) -> Date? {
+        guard let dateString = dateString else { return nil }
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter.date(from: dateString)
+    }
+    
+
+    
+    func checkAvailability(event: String?, time: String?, flightArrivalTime: Date, completion: @escaping (Result<[String: Any], Error>) -> Void) {
+        let calendar = Calendar.current
+        let startDate = calendar.startOfDay(for: flightArrivalTime)
+        let endDate = calendar.date(byAdding: .day, value: 1, to: startDate)!
+
+        fetchEvents(from: startDate, to: endDate) { result in
+            switch result {
+            case .success(let events):
+                self.findClosestEventUsingLLM(events: events, query: event ?? "", completion: { result in
+                    switch result {
+                    case .success(let closestEvent):
+                        let isAvailable = closestEvent.startDate > flightArrivalTime
+                        let timeDifference = closestEvent.startDate.timeIntervalSince(flightArrivalTime)
+                        
+                        let availabilityInfo: [String: Any] = [
+                            "isAvailable": isAvailable,
+                            "event": closestEvent.title,
+                            "flightArrivalTime": flightArrivalTime,
+                            "eventStartTime": closestEvent.startDate,
+                            "timeDifference": timeDifference,
+                            "eventLocation": closestEvent.location ?? "Unknown"
+                        ]
+                        completion(.success(availabilityInfo))
+                    case .failure(let error):
+                        completion(.failure(error))
+                    }
+                })
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+
+    private func findClosestEventUsingLLM(events: [EKEvent], query: String, completion: @escaping (Result<EKEvent, Error>) -> Void) {
+        let eventsInfo = events.map { event in
+            return [
+                "title": event.title,
+                "startDate": ISO8601DateFormatter().string(from: event.startDate),
+                "location": event.location ?? "Unknown"
+            ]
+        }
+
+        let prompt = """
+        Given the following events and a user query, determine which event is most likely the one the user is referring to. Return ONLY the index number of the best matching event. If no event matches, return -1.
+
+        Events:
+        \(eventsInfo.enumerated().map { index, event in
+            "[\(index)] Title: \(event["title"] ?? ""), Start: \(event["startDate"] ?? ""), Location: \(event["location"] ?? "")"
+        }.joined(separator: "\n"))
+
+        User Query: "\(query)"
+
+        Best matching event index:
+        """
+
+        llmService.getCompletion(for: prompt) { result in
+            switch result {
+            case .success(let response):
+                if let index = Int(response.trimmingCharacters(in: .whitespacesAndNewlines)),
+                   index >= 0 && index < events.count {
+                    completion(.success(events[index]))
+                } else {
+                    completion(.failure(NSError(domain: "Invalid LLM response", code: -1, userInfo: nil)))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+
+    func fetchEvents(from startDate: Date, to endDate: Date, completion: @escaping (Result<[EKEvent], Error>) -> Void) {
+        checkAuthorizationStatus { authorized in
+            if authorized {
+                let predicate = self.eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil)
+                let events = self.eventStore.events(matching: predicate)
+                completion(.success(events))
+            } else {
+                completion(.failure(NSError(domain: "Calendar access not authorized", code: -1, userInfo: nil)))
+            }
+        }
+    }
+
+    private func handleCalendarAction(_ action: Action, context: inout [String: Any], completion: @escaping (Result<[String: AnyCodable], Error>) -> Void) {
+        guard let parameters = action.parameters else {
+            print("Error: Missing parameters for calendar action")
+            completion(.failure(NSError(domain: "Missing parameters", code: -1, userInfo: nil)))
+            return
+        }
+        
+        let event = parameters["event"]?.value as? String
+        let time = parameters["time"]?.value as? String
+        
+        guard let flight = context["flight"] as? Flight else {
+            completion(.failure(NSError(domain: "Missing flight information", code: -1, userInfo: nil)))
+            return
+        }
+        
+        let flightArrivalTime = flight.actualArrivalTime
+        
+        print("Executing calendar action for event: \(event ?? "nil") at time: \(time ?? "nil")")
+        
+        CalendarService.shared.checkAvailability(event: event, time: time, flightArrivalTime: flightArrivalTime) { [context] result in
+            switch result {
+            case .success(let availabilityInfo):
+                print("Calendar availability check successful: \(availabilityInfo)")
+                if let isAvailable = availabilityInfo["isAvailable"] as? Bool,
+                   let eventLocation = availabilityInfo["eventLocation"] as? String {
+                    var resultContext: [String: AnyCodable] = [
+                        "isAvailable": AnyCodable(isAvailable),
+                        "eventLocation": AnyCodable(eventLocation)
+                    ]
+                    if let eventStartTime = availabilityInfo["eventStartTime"] as? Date {
+                        resultContext["eventStartTime"] = AnyCodable(eventStartTime)
+                    }
+                    
+                    // Update the context on the main thread
+                    DispatchQueue.main.async {
+//                        context["eventLocation"] = eventLocation
+                        completion(.success(resultContext))
+                    }
+                } else {
+                    completion(.failure(NSError(domain: "Invalid availability info", code: -1, userInfo: nil)))
+                }
+            case .failure(let error):
+                print("Calendar availability check failed: \(error.localizedDescription)")
+                completion(.failure(error))
+            }
+        }
     }
 }

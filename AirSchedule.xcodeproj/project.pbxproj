@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		7B5703BE2CBDC047005ACF06 /* ActionExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5703BD2CBDC03D005ACF06 /* ActionExecutor.swift */; };
+		7B5703C02CBDD152005ACF06 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5703BF2CBDD14E005ACF06 /* WeatherService.swift */; };
+		7B5703C22CBDD18F005ACF06 /* MapsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5703C12CBDD189005ACF06 /* MapsService.swift */; };
+		7B5703C42CBDD521005ACF06 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5703C32CBDD51C005ACF06 /* MapView.swift */; };
+		7B5703C62CBDD6D0005ACF06 /* ClothingAdviceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5703C52CBDD6CB005ACF06 /* ClothingAdviceService.swift */; };
 		7BE10E992CBCD21400E5A3DB /* AirScheduleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10E942CBCD21400E5A3DB /* AirScheduleApp.swift */; };
 		7BE10E9B2CBCD21400E5A3DB /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BE10E922CBCD21400E5A3DB /* Preview Assets.xcassets */; };
 		7BE10E9C2CBCD21400E5A3DB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BE10E952CBCD21400E5A3DB /* Assets.xcassets */; };
@@ -35,6 +39,11 @@
 
 /* Begin PBXFileReference section */
 		7B5703BD2CBDC03D005ACF06 /* ActionExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionExecutor.swift; sourceTree = "<group>"; };
+		7B5703BF2CBDD14E005ACF06 /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
+		7B5703C12CBDD189005ACF06 /* MapsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapsService.swift; sourceTree = "<group>"; };
+		7B5703C32CBDD51C005ACF06 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
+		7B5703C52CBDD6CB005ACF06 /* ClothingAdviceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClothingAdviceService.swift; sourceTree = "<group>"; };
+		7B5703C72CBDEE88005ACF06 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		7BE10E642CBCCCFF00E5A3DB /* AirSchedule.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AirSchedule.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7BE10E922CBCD21400E5A3DB /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		7BE10E942CBCD21400E5A3DB /* AirScheduleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirScheduleApp.swift; sourceTree = "<group>"; };
@@ -100,6 +109,7 @@
 		7BE10E982CBCD21400E5A3DB /* AirSchedule */ = {
 			isa = PBXGroup;
 			children = (
+				7B5703C72CBDEE88005ACF06 /* Info.plist */,
 				7BE10ECF2CBD99BA00E5A3DB /* APIKeys.swift */,
 				7BE10EA52CBCD84A00E5A3DB /* Services */,
 				7BE10EA42CBCD74C00E5A3DB /* Views */,
@@ -139,6 +149,7 @@
 		7BE10EA42CBCD74C00E5A3DB /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				7B5703C32CBDD51C005ACF06 /* MapView.swift */,
 				7BE10EB32CBCECFC00E5A3DB /* SearchBar.swift */,
 				7BE10EAF2CBCDA9D00E5A3DB /* FlightDetailView.swift */,
 				7BE10EAD2CBCDA0A00E5A3DB /* FlightListView.swift */,
@@ -149,6 +160,9 @@
 		7BE10EA52CBCD84A00E5A3DB /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				7B5703C52CBDD6CB005ACF06 /* ClothingAdviceService.swift */,
+				7B5703C12CBDD189005ACF06 /* MapsService.swift */,
+				7B5703BF2CBDD14E005ACF06 /* WeatherService.swift */,
 				7BE10ED72CBDA10D00E5A3DB /* ResponseGenerationService.swift */,
 				7BE10ED52CBDA0EE00E5A3DB /* ActionPlanningService.swift */,
 				7BE10ED32CBDA0D100E5A3DB /* IntentRecognitionService.swift */,
@@ -243,14 +257,18 @@
 				7BE10EB62CBD0B5500E5A3DB /* CalendarService.swift in Sources */,
 				7BE10ED62CBDA0F200E5A3DB /* ActionPlanningService.swift in Sources */,
 				7BE10EB82CBD145D00E5A3DB /* LLMService.swift in Sources */,
+				7B5703C42CBDD521005ACF06 /* MapView.swift in Sources */,
 				7BE10EB22CBCDC3900E5A3DB /* FlightDetailViewModel.swift in Sources */,
 				7BE10EBC2CBD855200E5A3DB /* ActionPlan.swift in Sources */,
 				7BE10E992CBCD21400E5A3DB /* AirScheduleApp.swift in Sources */,
 				7B5703BE2CBDC047005ACF06 /* ActionExecutor.swift in Sources */,
+				7B5703C02CBDD152005ACF06 /* WeatherService.swift in Sources */,
 				7BE10EAE2CBCDA1000E5A3DB /* FlightListView.swift in Sources */,
 				7BE10EDC2CBDA17000E5A3DB /* DynamicUIRenderer.swift in Sources */,
 				7BE10EB42CBCED0000E5A3DB /* SearchBar.swift in Sources */,
 				7BE10EAC2CBCD9F600E5A3DB /* FlightListViewModel.swift in Sources */,
+				7B5703C62CBDD6D0005ACF06 /* ClothingAdviceService.swift in Sources */,
+				7B5703C22CBDD18F005ACF06 /* MapsService.swift in Sources */,
 				7BE10EA72CBCD85E00E5A3DB /* FlightService.swift in Sources */,
 				7BE10ED02CBD99BC00E5A3DB /* APIKeys.swift in Sources */,
 				7BE10EC02CBD890900E5A3DB /* Supporting.swift in Sources */,
@@ -390,6 +408,9 @@
 				DEVELOPMENT_TEAM = 8D766T7F2J;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AirSchedule/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -419,6 +440,9 @@
 				DEVELOPMENT_TEAM = 8D766T7F2J;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AirSchedule/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

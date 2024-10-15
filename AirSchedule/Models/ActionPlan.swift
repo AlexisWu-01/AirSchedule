@@ -9,7 +9,7 @@ import Foundation
 
 struct ActionPlan: Codable {
     let intent: String
-    let entities: [String: AnyCodable]
+    let entities: [String: AnyCodable]?
     let actions: [Action]?
     let uiComponents: [UIComponent]
     

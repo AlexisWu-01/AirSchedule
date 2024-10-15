@@ -120,4 +120,6 @@ enum APIError: Error {
     case invalidURL
     case invalidResponse(statusCode: Int)
     case noData
+    case unknownAPI
+    case invalidParameters
 }
