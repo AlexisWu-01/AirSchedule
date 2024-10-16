@@ -25,14 +25,26 @@ struct ActionPlan: Codable {
         entities = try container.decode([String: String].self, forKey: .entities)
         actions = try container.decodeIfPresent([Action].self, forKey: .actions)
         uiComponents = try container.decode([UIComponent].self, forKey: .uiComponents)
-        updateUIComponents = { components, context in
+        updateUIComponents = { components, context in 
             for (index, component) in components.enumerated() {
                 if component.type == "meetingAvailability",
                    let meetingData = context["meetingAvailabilityData"]?.value as? [String: AnyCodable] {
                     components[index].properties = meetingData
+                } else if component.type == "text",
+                          let meetingData = context["meetingAvailabilityData"]?.value as? [String: AnyCodable],
+                          let canMakeIt = meetingData["canMakeIt"]?.value as? Bool,
+                          let travelTime = meetingData["travelTime"]?.value as? TimeInterval {
+                    let formattedTravelTime = ActionPlan.formatDuration(travelTime)
+                    let message = "The travel time is \(formattedTravelTime). You will \(canMakeIt ? "be able" : "not be able") to make it to the meeting."
+                    components[index].properties["content"] = AnyCodable(message)
                 }
             }
         }
+    }
+
+    static private func formatDuration(_ duration: TimeInterval) -> String {
+        let minutes = Int(duration / 60)
+        return "\(minutes) minutes"
     }
 }
 

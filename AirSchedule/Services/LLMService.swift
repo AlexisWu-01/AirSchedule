@@ -235,17 +235,18 @@ class LLMService {
                 }
                 },
                 {
-                "type": "text",
-                "properties": {
-                    "canMakeIt": true, // Dynamically set based on calendar and map data
-                    "message": "You can make it to your apple meeting on time."
-                }
-                },
-                {
                 "type": "map",
                 "properties": {
                     "from": "arrivalAirport",
                     "to": "eventLocation",
+                }
+                },
+                {
+                "type": "text",
+                "properties": {
+                    "canMakeIt": true, // Dynamically set based on calendar and map data
+                    "travelTime": 30, // Dynamically set based on calendar and map data
+                    "message": "The travel time is 30 minutes. You will be able to make it to the meeting on time."
                 }
                 }
             ]
@@ -262,6 +263,8 @@ class LLMService {
             **Special Note:**
             - The startTime and location in the meetingAvailability component are placeholders and should be dynamically replaced with actual event start time and location from the calendar API response.
             - The actual meeting data will be inserted into these properties after the calendar action is executed.
+            - Ensure that the calendar API is called before the maps API.
+            - Use the updated meetingAvailabilityData for the maps API call.
 
             ---
 
@@ -490,22 +493,59 @@ class LLMService {
 
     // Add this method to the LLMService class
 
-    func getCompletion(for prompt: String, completion: @escaping (Result<String, Error>) -> Void) {
+    func getCompletion(for context: String, completion: @escaping (Result<String, Error>) -> Void) {
         let url = URL(string: "https://api.openai.com/v1/chat/completions")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let prompt: String = """
+        You are a helpful assistant. Given a list of events with details such as event name, start time, and location, and a user query, identify which event is most relevant to the query. Return ONLY the index number of the best matching event. If no event matches, return -1.
         
+        Consider the following:
+        - Match the event name, location, or start time as closely as possible to the user's query.
+        - If multiple events seem to match, prioritize those with the closest start time to the user's query.
+        - If no events match, return -1.
+
+        Here are some examples:
+
+        Example 1:
+        Events:
+        1. {"event": "apple meeting", "startTime": "2024-10-16T15:30:00Z", "location": "Apple Park, Cupertino, CA"}
+        2. {"event": "team meeting", "startTime": "2024-10-16T16:00:00Z", "location": "Conference Room A"}
+        3. {"event": "product review", "startTime": "2024-10-17T09:00:00Z", "location": "Zoom"}
+
+        User Query: "What time is my Apple meeting?"
+
+        Expected Output: 0 (index of the first event, as it matches the event name and location)
+
+        Example 2:
+        Events:
+        1. {"event": "lunch with client", "startTime": "2024-10-17T12:30:00Z", "location": "Downtown Cafe"}
+        2. {"event": "team sync", "startTime": "2024-10-17T14:00:00Z", "location": "Office"}
+
+        User Query: "When is my meeting?"
+
+        Expected Output: -1 (since no event explicitly matches a "meeting")
+
+        Example 3:
+        Events:
+        1. {"event": "marketing presentation", "startTime": "2024-10-18T11:00:00Z", "location": "Zoom"}
+        2. {"event": "design review", "startTime": "2024-10-19T15:00:00Z", "location": "Room 12"}
+
+        User Query: "Is my design review scheduled for today?"
+
+        Expected Output: 1 (as the event name matches the query and the user is asking about a specific event)
+    """ 
         let messages: [[String: String]] = [
             ["role": "system", "content": "You are a helpful assistant."],
-            ["role": "user", "content": prompt]
+            ["role": "user", "content": context]
         ]
         
         let body: [String: Any] = [
             "model": "gpt-3.5-turbo",
             "messages": messages,
-            "max_tokens": 100,
+            "max_tokens": 200,
             "temperature": 0
         ]
         

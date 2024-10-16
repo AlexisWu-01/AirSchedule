@@ -105,8 +105,10 @@ class ActionExecutor {
         }
         
         guard let meetingAvailabilityData = context["meetingAvailabilityData"] as? [String: AnyCodable],
-              let eventLocation = meetingAvailabilityData["location"]?.value as? String else {
-            print("Error: Missing eventLocation in meetingAvailabilityData")
+              let eventLocation = meetingAvailabilityData["location"]?.value as? String,
+              let eventStartTimeString = meetingAvailabilityData["startTime"]?.value as? String,
+              let eventStartTime = ISO8601DateFormatter().date(from: eventStartTimeString) else {
+            print("Error: Missing or invalid meetingAvailabilityData in context")
             completion(.failure(APIError.invalidParameters))
             return
         }
@@ -118,16 +120,24 @@ class ActionExecutor {
         MapsService.shared.getDirections(from: from, to: to, arrivalTime: arrivalTime) { result in
             switch result {
             case .success(let (route, travelTime, sourceCoordinate, destinationCoordinate)):
+                let arrivalPlusTravel = arrivalTime.addingTimeInterval(travelTime + 20 * 60) // Add 20 minutes buffer
+                let canMakeIt = arrivalPlusTravel <= eventStartTime
+                
                 let mapData: [String: AnyCodable] = [
                     "fromLocation": AnyCodable(sourceCoordinate),
                     "toLocation": AnyCodable(destinationCoordinate),
                     "travelTime": AnyCodable(travelTime),
-                    "route": AnyCodable(route)
+                    "route": AnyCodable(route),
+                    "canMakeIt": AnyCodable(canMakeIt)
                 ]
+                
+                var updatedMeetingData = meetingAvailabilityData
+                updatedMeetingData["canMakeIt"] = AnyCodable(canMakeIt)
+                updatedMeetingData["travelTime"] = AnyCodable(travelTime)
                 
                 let combinedData: [String: AnyCodable] = [
                     "mapData": AnyCodable(mapData),
-                    "meetingAvailabilityData": AnyCodable(meetingAvailabilityData)
+                    "meetingAvailabilityData": AnyCodable(updatedMeetingData)
                 ]
                 
                 completion(.success(combinedData))

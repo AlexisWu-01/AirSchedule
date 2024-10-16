@@ -46,11 +46,6 @@ struct DynamicUIRenderer: View {
             if let content = component.properties["content"]?.value as? String {
                 Text(content)
                     .onAppear { print("Debug: Rendering text component \(index): \(content)") }
-            } else if let canMakeIt = component.properties["canMakeIt"]?.value as? Bool,
-                      let message = component.properties["message"]?.value as? String {
-                Text(message)
-                    .foregroundColor(canMakeIt ? .green : .red)
-                    .onAppear { print("Debug: Rendering text component \(index): \(message)") }
             } else {
                 Text("Invalid text component")
                     .foregroundColor(.red)
