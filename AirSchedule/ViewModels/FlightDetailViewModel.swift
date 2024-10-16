@@ -62,19 +62,16 @@ class FlightDetailViewModel: ObservableObject {
                 }
                 print("Debug: Final updated context in FlightDetailViewModel: \(self.context)")
                 
-                // Update UI components using the updated context
-                var updatedUIComponents = actionPlan.uiComponents
-                for i in 0..<updatedUIComponents.count {
-                    if updatedUIComponents[i].type == "meetingAvailability",
-                       let meetingData = self.context["meetingAvailabilityData"]?.value as? [String: AnyCodable] {
-                        updatedUIComponents[i].properties = meetingData
-                    }
-                    // Add similar checks for other component types if needed
+                // Update UI components
+                if let updatedUIComponents = self.context["ui_components"]?.value as? [UIComponent] {
+                    self.uiComponents = updatedUIComponents
+                } else {
+                    // If ui_components are not in the context, use the original UI components from the action plan
+                    self.uiComponents = actionPlan.uiComponents
                 }
                 
-                print("Debug: Updated UI components: \(updatedUIComponents)")
+                print("Debug: Updated UI components: \(self.uiComponents)")
                 
-                self.uiComponents = updatedUIComponents
                 self.updateUI()
                 completion(success, error)
             }
@@ -146,4 +143,9 @@ class FlightDetailViewModel: ObservableObject {
         return "\(sign)\(hours)h \(minutes)m"
     }
 
+    func updateUIComponents() {
+        if let updatedComponents = context["ui_components"]?.value as? [UIComponent] {
+            self.uiComponents = updatedComponents
+        }
+    }
 }

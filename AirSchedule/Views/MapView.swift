@@ -9,6 +9,7 @@ import SwiftUI
 import MapKit
 
 struct MapLocationView: View {
+    let id = UUID()
     let fromCoordinate: CLLocationCoordinate2D
     let toCoordinate: CLLocationCoordinate2D
     @State private var route: MKRoute?
@@ -35,6 +36,7 @@ struct MapLocationView: View {
         ]) { annotation in
             MapMarker(coordinate: annotation.coordinate, tint: annotation.title == "Start" ? .green : .red)
         }
+        .frame(height: 300)
         .overlay(
             route.map { route in
                 MapOverlay(route: route)
