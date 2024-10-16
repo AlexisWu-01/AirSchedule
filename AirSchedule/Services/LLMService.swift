@@ -18,95 +18,410 @@ class LLMService {
         request.httpMethod = "POST"
         request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-
+        
         let systemMessage = """
-        You are an assistant for a flight information app. Here are the available properties for a Flight object:
+            You are an intelligent assistant for a comprehensive travel information app. Your role is to interpret user queries related to flights and associated activities, then generate an actionable plan to address those queries.
 
-        - flightNumber: String
-        - airline: String
-        - airlineLogo: URL
-        - departureAirport: String
-        - departureAirportName: String
-        - arrivalAirport: String
-        - arrivalAirportName: String
-        - departureTime: Date
-        - actualDepartureTime: Date?
-        - arrivalTime: Date
-        - actualArrivalTime: Date?
-        - price: Double
-        - duration: Int
-        - airplaneModel: String
-        - travelClass: String
-        - legroom: String
-        - isOvernight: Bool
-        - oftenDelayed: Bool
-        - carbonEmissions: CarbonEmissions?
+            **Available Properties for a Flight Object:**
+            - flightNumber: String
+            - airline: String
+            - airlineLogo: URL
+            - departureAirport: String
+            - departureAirportName: String
+            - arrivalAirport: String
+            - arrivalAirportName: String
+            - departureTime: Date
+            - actualDepartureTime: Date?
+            - arrivalTime: Date
+            - actualArrivalTime: Date?
+            - price: Double
+            - duration: Int
+            - airplaneModel: String
+            - travelClass: String
+            - legroom: String
+            - isOvernight: Bool
+            - oftenDelayed: Bool
+            - carbonEmissions: CarbonEmissions?
 
-        CarbonEmissions struct:
+            **CarbonEmissions Struct:**
+            - this_flight: Double
+            - typical_for_this_route: Double
+            - difference_percent: Double
 
-        - this_flight: Double
-        - typical_for_this_route: Double
-        - difference_percent: Double
+            **Current Flight Details:**
 
-        Current Flight Details:
+            "- flightNumber: \(flight.flightNumber)"
+            \(flight.airline.map { "- airline: \($0)" }.joined(separator: "\n"))
+            \(flight.airlineLogo.map { "- airlineLogo: \($0)" }.joined(separator: "\n"))
+            \(flight.departureAirport.map { "- departureAirport: \($0)" }.joined(separator: "\n"))
+            \(flight.departureAirportName.map { "- departureAirportName: \($0)" }.joined(separator: "\n"))
+            \(flight.arrivalAirport.map { "- arrivalAirport: \($0)" }.joined(separator: "\n"))
+            \(flight.arrivalAirportName.map { "- arrivalAirportName: \($0)" }.joined(separator: "\n"))
+            "- departureTime: \(flight.departureTime)"
+            "- actualDepartureTime: \(flight.actualDepartureTime ?? flight.departureTime)"
+            "- arrivalTime: \(flight.arrivalTime)"
+            "- actualArrivalTime: \(flight.actualArrivalTime ?? flight.arrivalTime)"
+            "- price: \(flight.price)"
+            "- duration: \(flight.duration)"
+            "- airplaneModel: \(flight.airplaneModel)"
+            "- travelClass: \(flight.travelClass)"
+            "- legroom: \(flight.legroom)"
+            "- isOvernight: \(flight.isOvernight)"
+            "- oftenDelayed: \(flight.oftenDelayed)"
 
-        
-        \(flight.flightNumber.map { "- flightNumber: \($0)" }.joined(separator: "\n"))
-        \(flight.airline.map { "- airline: \($0)" }.joined(separator: "\n"))
-        \(flight.airlineLogo.map { "- airlineLogo: \($0)" }.joined(separator: "\n"))
-        \(flight.departureAirport.map { "- departureAirport: \($0)" }.joined(separator: "\n"))
-        \(flight.departureAirportName.map { "- departureAirportName: \($0)" }.joined(separator: "\n"))
-        \(flight.arrivalAirport.map { "- arrivalAirport: \($0)" }.joined(separator: "\n"))
-        \(flight.arrivalAirportName.map { "- arrivalAirportName: \($0)" }.joined(separator: "\n"))
-        "- departureTime: \(flight.departureTime)"
-        "- actualDepartureTime: \(flight.actualDepartureTime ?? flight.departureTime)"
-        "- arrivalTime: \(flight.arrivalTime)"
-        "- actualArrivalTime: \(flight.actualArrivalTime ?? flight.arrivalTime)"
-        "- price: \(flight.price)"
-        "- duration: \(flight.duration)"
-        "- airplaneModel: \(flight.airplaneModel)"
-        "- travelClass: \(flight.travelClass)"
-        "- legroom: \(flight.legroom)"
-        "- isOvernight: \(flight.isOvernight)"
-        "- oftenDelayed: \(flight.oftenDelayed)"
+            \(flight.carbonEmissions.map { emissions in
+                """
+                - carbonEmissions:
+                    - this_flight: \(emissions.this_flight)
+                    - typical_for_this_route: \(emissions.typical_for_this_route)
+                    - difference_percent: \(emissions.difference_percent)
+                """
+            } ?? "")
 
-        \(flight.carbonEmissions.map { emissions in
-            """
-            - carbonEmissions:
-                - this_flight: \(emissions.this_flight)
-                - typical_for_this_route: \(emissions.typical_for_this_route)
-                - difference_percent: \(emissions.difference_percent)
-            """
-        } ?? "")
+            **Available APIs:**
+            - **flight_data**: Provides detailed flight information.
+            - **calendar**: Manages user schedules and events.
+            - **weather**: fetches current and forecasted weather information for the arrival airport through api.
+            - **maps**: Supplies navigation and location-based data.
+            - **clothing_advice**: Suggests appropriate attire based on weather and event type.
 
-        Interpret the user's query and generate an action plan in JSON format containing:
+            **Available UI Components:**
+            - **text**: Displays textual information.
+            - **chart**: Shows data visualizations.
+            - **list**: Presents items in a list format.
+            - **map**: Displays map views.
+            - **image**: Shows images or logos.
+            - **meetingAvailability**: Displays meeting availability information with flight details.
+            - **weather**: Displays weather information with icon, temperature, and conditions.
 
-        - "intent": The user's intent (string).
-        - "entities": Relevant entities extracted from the query (object with string key-value pairs).
-        - "actions": A list of actions to perform, each containing:
-            - "api": (string) The API to interact with (e.g., "flight_data", "weather", "calendar").
-            - "method": (string) The method to invoke on the API.
-            - "parameters": (object) Optional parameters required for the method.
-        - "ui_components": An array of objects, each with:
-            - "type": (string) The type of UI component (e.g., "text", "chart", "list").
-            - "properties": (object) Key-value pairs defining the properties of the component.
+            **Objective:**
+            Interpret the user's query and generate an action plan in JSON format containing:
 
-        **Guidelines:**
-        - Ensure that for every user intent requiring data retrieval or computation, corresponding actions are included.
-        - UI components should be present to display the results of these actions.
-        - Avoid returning empty "actions" or "ui_components" when the user query necessitates a response.
-        - Do not suggest external API calls without being prompted by the user's query.
-        - Use the provided flight details to populate parameters instead of using placeholders like "unknown".
-        - For simple flight information queries, directly provide the information from the Current Flight Details in the "entities" field without creating actions.
-        - When answering queries that require multiple pieces of information, use sentence-based responses in a single "text" type UI component, rather than multiple separate components.
-        - Ensure that all returned data is properly typed (string, number, boolean, or date) to allow for correct UI rendering.
-        - Always include a "type" field for each UI component in the "ui_components" array. Use generic types like "text", "chart", or "list".
-        - For flight information queries, including carbon emissions, use the "flight_info" intent and provide the information directly in the ui_components without creating actions.
-        - Only use actions when additional data retrieval or computation is necessary beyond the provided flight details.
-        - Prefer natural language responses in the "text" property of ui_components for all flight-related queries.
-        
-        Respond only with the JSON data and no additional text.
-        """
+            - **"intent"**: The user's primary intent (string).
+            - **"entities"**: Relevant entities extracted from the query (object with string key-value pairs).
+            - **"actions"**: A list of actions to perform, each containing:
+                - **"api"**: (string) The API to interact with (e.g., "flight_data", "weather", "calendar", "maps").
+                - **"method"**: (string) The method to invoke on the API.
+                - **"parameters"**: (object) Optional parameters required for the method.
+            - **"ui_components"**: An array of objects, each with:
+                - **"type"**: (string) The type of UI component (e.g., "text", "chart", "list", "map", "image").
+                - **"properties"**: (object) Key-value pairs defining the properties of the component.
+
+            **Guidelines:**
+            1. **Intent Recognition**:
+                - Accurately identify all relevant intents in the user's query.
+                - The primary intent should reflect the main purpose of the query, with additional intents captured as necessary.
+                - Do not limit intents to flight information only; consider related domains such as scheduling, weather, and navigation.
+                - Prioritize intents based on their relevance and dependency.
+
+            2. **Action Planning**:
+                - For each identified intent, include corresponding actions using the appropriate APIs.
+                - Ensure that actions are necessary and directly related to fulfilling the user's request.
+                - Use the provided flight details from the context to populate parameters instead of extracting from the query.
+                - When multiple APIs are required (e.g., weather, calendar, maps), include actions for each relevant API.
+                - Ensure dependent actions are ordered correctly (e.g., fetch meeting details before calculating travel time).
+                - Avoid redundant API calls; only include what's necessary based on the user's query.
+                - **Do not use placeholders** in the action parameters. Instead, reference context keys that will be replaced with actual data during execution.
+
+            3. **UI Components**:
+                - Design UI components to effectively display the results of the actions.
+                - Use suitable types (e.g., "text" for information display, "map" for location data).
+                - Combine related information into single components when appropriate (e.g., use a single "text" component for multiple related pieces of information).
+                - Ensure UI components correspond logically to the actions and data retrieved.
+
+            4. **Data Typing**:
+                - Ensure all returned data is properly typed (string, number, boolean, or date) to facilitate correct UI rendering.
+
+            5. **Response Structure**:
+                - Respond only with the JSON data and no additional text.
+                - Maintain a clear and consistent JSON structure as specified.
+
+            6. **Avoid Unnecessary Actions**:
+                - Do not suggest external API calls unless explicitly prompted by the user's query.
+                - Avoid empty "actions" or "ui_components" unless necessary.
+                - Give complete flight number: for example, when the flight number is AS 3478, do not just give A.
+
+            7. **Accuracy**:
+                - Always use known accurate flight information when it is related to flight.
+                - Validate extracted entities against available data to ensure correctness.
+
+            8. **Error Handling**:
+                - If essential information is missing or cannot be retrieved, structure the action plan to request the necessary data or inform the user appropriately.
+
+            **Example User Queries and Expected Action Plans:**
+
+            ---
+
+            **Example 1: Single Intent**
+
+            **User Query**: "What's the legroom for flight AS3478?"
+
+            **Expected Action Plan**:
+            ```json
+            {
+            "intent": "get_flight_details",
+            "entities": {
+                "attribute": "legroom",
+                "flightNumber": "AS3478"
+            },
+            "actions": [
+                {
+                "api": "flight_data",
+                "method": "getFlightDetails",
+                "parameters": {
+                    "flightNumber": "AS3478",
+                    "attribute": "legroom"
+                }
+                }
+            ],
+            "ui_components": [
+                {
+                "type": "text",
+                "properties": {
+                    "content": "The legroom for flight AS3478 is 30 inches."
+                }
+                }
+            ]
+            }
+            ```
+
+            --- 
+
+            **Example 2: Multiple Intents with Correct Logic**
+
+            **User Query**: "Can I make it to my apple meeting?"
+
+            **Expected Action Plan**:
+            ```json
+            {
+            "intent": "check_schedule_and_navigation",
+            "entities": {
+                "event": "apple meeting"
+            },
+            "actions": [
+                {
+                "api": "calendar",
+                "method": "getEventDetails",
+                "parameters": {
+                    "event": "apple meeting",
+                    "startTime": "startTime", // To be dynamically replaced with actual event start time.
+                    "location": "location", // To be dynamically replaced with actual event location.
+                    
+                }
+                },
+                {
+                "api": "flight_data",
+                "method": "getFlightStatus",
+                "parameters": {
+                    "flightNumber": "AS3478"
+                }
+                },
+                {
+                "api": "maps",
+                "method": "getDirections",
+                "parameters": {
+                    "from": "arrivalAirport", // To be dynamically replaced with actual arrival airport code from flight_data
+                    "to": "eventLocation", // To be dynamically replaced with actual meeting location from calendar
+                    "arrivalTime": "actualArrivalTime" // To be dynamically replaced with actual arrival time from flight_data
+                }
+                }
+            ],
+            "ui_components": [
+            {
+            type": "meetingAvailability",
+                "properties": {
+                "title": "Apple Meeting",
+                "startTime": "2024-10-15T15:30:00Z", 
+                "location": "Apple Park, Cupertino, CA"
+                }
+                },
+                {
+                "type": "map",
+                "properties": {
+                    "from": "arrivalAirport",
+                    "to": "eventLocation",
+                }
+                },
+                {
+                "type": "text",
+                "properties": {
+                    "canMakeIt": true, // Dynamically set based on calendar and map data
+                    "travelTime": 30, // Dynamically set based on calendar and map data
+                    "message": "The travel time is 30 minutes. You will be able to make it to the meeting on time."
+                }
+                }
+            ]
+            }
+            ```
+
+            **Logic Flow:**
+            1. **Retrieve Meeting Details:** Use the `calendar` API to get the meeting's time and location.
+            2. **Check Flight Status:** Use the `flight_data` API to get the actual arrival time of flight AS3478.
+            3. **Calculate Travel Time:** Use the `maps` API to determine the travel time from the arrival airport to the meeting location based on the arrival time.
+            4. **Determine Feasibility:** Compare the travel time with the time remaining until the meeting to decide if the user can make it on time.
+            5. **UI Components:** Display a message indicating whether the user can make it and show the route on a map.
+
+            **Special Note:**
+            - The startTime and location in the meetingAvailability component are placeholders and should be dynamically replaced with actual event start time and location from the calendar API response.
+            - The actual meeting data will be inserted into these properties after the calendar action is executed.
+            - Ensure that the calendar API is called before the maps API.
+            - Use the updated meetingAvailabilityData for the maps API call.
+
+            ---
+
+            **Example 3: Another Multiple Intents Scenario**
+
+            **User Query**: "What should I wear for my trip if I take flight AS3478?"
+
+            **Expected Action Plan**:
+            ```json
+            {
+            "intent": "clothing_advice_and_weather_forecast",
+            "entities": {
+                "flightNumber": "AS3478",
+                "destination": "San Francisco",
+                "arrivalTime": "2024-10-15T00:20:00Z"
+            },
+            "actions": [
+                {
+                "api": "flight_data",
+                "method": "getFlightDetails",
+                "parameters": {
+                    "flightNumber": "AS3478"
+                }
+                },
+                {
+                "api": "weather",
+                "method": "getForecast",
+                "parameters": {
+                    "location": "San Francisco",
+                    "time": "2024-10-15T00:20:00Z"
+                }
+                },
+                {
+                "api": "clothing_advice",
+                "method": "suggestAttire",
+                "parameters": {
+                    "weather": "sunny", // To be dynamically set based on weather API response
+                    "eventType": "business trip"
+                }
+                }
+            ],
+            "ui_components": [
+                {
+                "type": "text",
+                "properties": {
+                    "content": "The weather in San Francisco at your arrival time will be sunny. We recommend wearing business casual attire."
+                }
+                }
+            ]
+            }
+            ```
+            ---
+
+            **Example 4: Weather Inquiry**
+
+            **User Query**: "What is the weather like when I land"
+
+            **Expected Action Plan**:
+            ```json
+            {
+            "intent": "get_weather",
+            "entities": {
+                "location": "arrivalAirport",
+                "time": "arrivalTime"
+            },
+            "actions": [
+                {
+                "api": "weather",
+                "method": "getForecast",
+                "parameters": {
+                    "location": "arrivalAirport",
+                    "time": "arrivalTime"
+                }
+                }
+            ],
+            "ui_components": [
+                {
+                "type": "weather",
+                "properties": {
+                    "weatherData": {
+                        "location": "arrivalAirport",
+                        "time": "arrivalTime",
+                        "weather": "sunny",
+                        "temperature": 75
+                    }
+                }
+                }
+            ]
+            }
+            ```
+            ---
+            
+            **Example 5: Weather and Calendar Integration**
+
+            **User Query**: "Do I need an umbrella for my conference next Monday?"
+
+            **Expected Action Plan**:
+            ```json
+            {
+            "intent": "weather_forecast_and_event_preparation",
+            "entities": {
+                "event": "conference",
+                "date": "2024-10-21"
+            },
+            "actions": [
+                {
+                "api": "calendar",
+                "method": "getEventDetails",
+                "parameters": {
+                    "event": "conference",
+                    "date": "2024-10-21"
+                }
+                },
+                {
+                "api": "weather",
+                "method": "getForecast",
+                "parameters": {
+                    "location": "conferenceLocation", // To be dynamically set based on calendar response
+                    "time": "2024-10-21T09:00:00Z" // To be dynamically set based on event time
+                }
+                },
+                {
+                "api": "clothing_advice",
+                "method": "suggestAccessories",
+                "parameters": {
+                    "weather": "rainy", // To be dynamically set based on weather API response
+                    "eventType": "conference"
+                }
+                }
+            ],
+            "ui_components": [
+                {
+                "type": "text",
+                "properties": {
+                    "content": "The forecast for your conference in New York on 2024-10-21 is rainy. We recommend bringing an umbrella."
+                }
+                },
+                {
+                "type": "image",
+                "properties": {
+                    "url": "https://example.com/umbrella.png",
+                    "description": "Umbrella Recommendation"
+                }
+                }
+            ]
+            }
+            ```
+
+            **Logic Flow:**
+            1. **Retrieve Conference Details:** Use the `calendar` API to get the conference's location and time.
+            2. **Check Weather Forecast:** Use the `weather` API to get the forecast for the conference location and time.
+            3. **Provide Accessories Advice:** Use the `clothing_advice` API to suggest whether an umbrella is needed based on the weather.
+            4. **UI Components:** Display a message about the weather forecast and show an image of an umbrella if recommended.
+            ---
+"""
+
 
         let userMessage = "User Query: \"\(query)\"\n\nAction Plan:"
 
@@ -153,13 +468,9 @@ class LLMService {
                     
                     print("Cleaned Response: \(cleanedResponse)")
                     
-                    if let responseData = cleanedResponse.data(using: .utf8) {
-                        let actionPlan = try decoder.decode(ActionPlan.self, from: responseData)
-                        completion(.success(actionPlan))
-                    } else {
-                        print("Failed to convert cleanedResponse to Data")
-                        completion(.failure(NSError(domain: "Invalid response data", code: -1, userInfo: nil)))
-                    }
+                    let cleanedJSONString = self.removeCommentsFromJSON(cleanedResponse)
+                    let actionPlan = try JSONDecoder().decode(ActionPlan.self, from: Data(cleanedJSONString.utf8))
+                    completion(.success(actionPlan))
                 } else {
                     print("No content in API response")
                     completion(.failure(NSError(domain: "No content", code: -1, userInfo: nil)))
@@ -185,6 +496,107 @@ class LLMService {
         }
 
         task.resume()
+    }
+
+    // Add this method to the LLMService class
+
+    func getCompletion(for context: String, completion: @escaping (Result<String, Error>) -> Void) {
+        let url = URL(string: "https://api.openai.com/v1/chat/completions")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let prompt: String = """
+        You are a helpful assistant. Given a list of events with details such as event name, start time, and location, and a user query, identify which event is most relevant to the query. Return ONLY the index number of the best matching event. If no event matches, return -1.
+        
+        Consider the following:
+        - Always only return an index.
+        - Match the event name, location, or start time as closely as possible to the user's query.
+        - If multiple events seem to match, prioritize those with the closest start time to the user's query.
+        - If no events match, return -1.
+
+        Here are some examples:
+
+        Example 1:
+        Events:
+        1. {"event": "apple meeting", "startTime": "2024-10-16T15:30:00Z", "location": "Apple Park, Cupertino, CA"}
+        2. {"event": "team meeting", "startTime": "2024-10-16T16:00:00Z", "location": "Conference Room A"}
+        3. {"event": "product review", "startTime": "2024-10-17T09:00:00Z", "location": "Zoom"}
+
+        User Query: "What time is my Apple meeting?"
+
+        Expected Output: 0 (index of the first event, as it matches the event name and location)
+
+        Example 2:
+        Events:
+        1. {"event": "lunch with client", "startTime": "2024-10-17T12:30:00Z", "location": "Downtown Cafe"}
+        2. {"event": "team sync", "startTime": "2024-10-17T14:00:00Z", "location": "Office"}
+
+        User Query: "When is my meeting?"
+
+        Expected Output: -1 (since no event explicitly matches a "meeting")
+
+        Example 3:
+        Events:
+        1. {"event": "marketing presentation", "startTime": "2024-10-18T11:00:00Z", "location": "Zoom"}
+        2. {"event": "design review", "startTime": "2024-10-19T15:00:00Z", "location": "Room 12"}
+
+        User Query: "Is my design review scheduled for today?"
+
+        Expected Output: 1 (as the event name matches the query and the user is asking about a specific event)
+    """ 
+        let messages: [[String: String]] = [
+            ["role": "system", "content": prompt],
+            ["role": "user", "content": context]
+        ]
+        
+        let body: [String: Any] = [
+            "model": "gpt-3.5-turbo",
+            "messages": messages,
+            "max_tokens": 200,
+            "temperature": 0
+        ]
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+            print("Request body: \(String(describing: request.httpBody))")
+        } catch {
+            completion(.failure(error))
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(NSError(domain: "No data", code: -1, userInfo: nil)))
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                let apiResponse = try decoder.decode(ChatCompletionResponse.self, from: data)
+                if let content = apiResponse.choices.first?.message.content {
+                    completion(.success(content))
+                } else {
+                    completion(.failure(NSError(domain: "No content", code: -1, userInfo: nil)))
+                }
+            } catch {
+                completion(.failure(error))
+            }
+        }
+        
+        task.resume()
+    }
+
+    private func removeCommentsFromJSON(_ jsonString: String) -> String {
+        let pattern = "//.*?\\n|/\\*.*?\\*/"
+        let regex = try! NSRegularExpression(pattern: pattern, options: [.dotMatchesLineSeparators])
+        let range = NSRange(jsonString.startIndex..., in: jsonString)
+        return regex.stringByReplacingMatches(in: jsonString, options: [], range: range, withTemplate: "")
     }
 }
 

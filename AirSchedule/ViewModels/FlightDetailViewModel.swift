@@ -1,115 +1,148 @@
+//
+//  FlightDetailViewModel.swift
+//  AirSchedule
+//
+//  Created by Xinyi WU on 10/14/24.
+//
+
 import SwiftUI
+import Combine
 
 class FlightDetailViewModel: ObservableObject {
     @Published var flight: Flight
-    @Published var dynamicContent: AnyView = AnyView(EmptyView())
     @Published var uiComponents: [UIComponent] = []
-    @Published var context: [String: Any] = [:]
+    @Published var context: [String: AnyCodable] = [:]
 
     init(flight: Flight) {
         self.flight = flight
+        self.context = ["flight": AnyCodable(flight)]
+    }
+    
+    private func updateUI() {
+        DispatchQueue.main.async {
+            print("Debug: Updating UI with \(self.uiComponents.count) components")
+            for (index, component) in self.uiComponents.enumerated() {
+                print("Debug: Component \(index) - Type: \(type(of: component)), Content: \(component)")
+            }
+            self.objectWillChange.send()
+        }
     }
 
     func processUserQuery(_ query: String, completion: @escaping (Bool, Error?) -> Void) {
         LLMService.shared.parseUserQuery(query, forFlight: flight) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let actionPlan):
-                    self?.executeActionPlan(actionPlan, completion: completion)
-                case .failure(let error):
-                    print("Error parsing user query: \(error.localizedDescription)")
-                    self?.handleLLMError(error)
-                    completion(false, error)
+            guard let self = self else { return }
+            switch result {
+            case .success(let actionPlan):
+                self.executeActionPlan(actionPlan, completion: completion)
+            case .failure(let error):
+                print("Error parsing user query: \(error.localizedDescription)")
+                if let decodingError = error as? DecodingError {
+                    print("Decoding error: \(decodingError)")
                 }
+                self.handleLLMError(error)
+                completion(false, error)
             }
         }
     }
 
-    func handleLLMError(_ error: Error) {
+    private func handleLLMError(_ error: Error) {
         let errorComponent = UIComponent(type: "error", properties: ["text": AnyCodable(error.localizedDescription)])
-        self.uiComponents = [errorComponent]
-        self.updateUI()
+        DispatchQueue.main.async {
+            self.uiComponents = [errorComponent]
+        }
     }
 
     func executeActionPlan(_ actionPlan: ActionPlan, completion: @escaping (Bool, Error?) -> Void) {
-        context = ["flight": flight] // Set the flight in the context
-        uiComponents = [] // Reset UI components
-        let actionGroup = DispatchGroup()
-
-        // Handle direct flight information retrieval or complex actions
-        if actionPlan.actions.isEmpty {
-            self.uiComponents = actionPlan.uiComponents
-            self.updateUI()
-            completion(true, nil)
-            return
-        }
-
-        // Handle complex actions
-        for action in actionPlan.actions {
-            print("Processing action: API=\(action.api), Method=\(action.method)")
-            actionGroup.enter()
-            ActionExecutor.shared.executeAction(action, context: &context) { result in
-                switch result {
-                case .success(let updatedContext):
-                    self.context.merge(updatedContext) { (_, new) in new }
-                    print("Action executed successfully. Updated context: \(updatedContext)")
-                case .failure(let error):
-                    print("Error executing action: \(error.localizedDescription)")
-                    self.uiComponents.append(UIComponent(type: "error", properties: ["text": AnyCodable(error.localizedDescription)]))
+        var contextAny: [String: Any] = self.context.mapValues { $0.value }
+        executeActionsSequentially(actions: actionPlan.actions ?? [], index: 0, context: contextAny) { success, error, updatedContext in
+            DispatchQueue.main.async {
+                // Merge the updated context with the existing context
+                for (key, value) in updatedContext {
+                    self.context[key] = AnyCodable(value)
                 }
-                actionGroup.leave()
-            }
-        }
-
-        actionGroup.notify(queue: .main) { [weak self] in
-            guard let self = self else { return }
-            if self.uiComponents.isEmpty {
-                if !actionPlan.uiComponents.isEmpty {
-                    self.uiComponents = actionPlan.uiComponents
-                } else {
-                    let newComponents = self.generateUIComponents(from: self.context)
-                    if !newComponents.isEmpty {
-                        self.uiComponents = newComponents
-                    } else {
-                        let defaultComponent = UIComponent(type: "text", properties: ["content": AnyCodable("No information available.")])
-                        self.uiComponents = [defaultComponent]
+                print("Debug: Final updated context in FlightDetailViewModel: \(self.context)")
+                
+                // Update UI components using the updateUIComponents closure
+                var updatedUIComponents = actionPlan.uiComponents
+                for i in 0..<updatedUIComponents.count {
+                    if updatedUIComponents[i].type == "weather",
+                       let weatherData = self.context["weatherData"]?.value as? [String: AnyCodable] {
+                        updatedUIComponents[i].properties["weatherData"] = AnyCodable(weatherData)
                     }
                 }
+                
+                print("Debug: Updated UI components: \(updatedUIComponents)")
+                
+                self.uiComponents = updatedUIComponents
+                self.updateUI()
+                completion(success, error)
             }
-            print("Updating UI with components: \(self.uiComponents)")
-            self.updateUI()
-            completion(true, nil)
         }
     }
 
-    private func generateUIComponents(from context: [String: Any]) -> [UIComponent] {
-        var components: [UIComponent] = []
-
-        if let content = context["content"] as? String {
-            components.append(UIComponent(type: "text", properties: ["content": AnyCodable(content)]))
+    private func executeActionsSequentially(actions: [Action], index: Int, context: [String: Any], completion: @escaping (Bool, Error?, [String: Any]) -> Void) {
+        if index >= actions.count {
+            completion(true, nil, context)
+            return
         }
-
-        if let carbonEmissions = context["this_flight"] as? Int,
-           let typicalEmissions = context["typical_for_this_route"] as? Int,
-           let differencePercent = context["difference_percent"] as? Int {
-            let text = """
-            Carbon Emissions:
-            - This Flight: \(carbonEmissions) kg CO2
-            - Typical for this Route: \(typicalEmissions) kg CO2
-            - Difference: \(differencePercent)%
-            """
-            components.append(UIComponent(type: "text", properties: ["content": AnyCodable(text)]))
+        
+        let action = actions[index]
+        print("Processing action: API=\(action.api), Method=\(action.method)")
+        
+        ActionExecutor.shared.executeAction(action, context: context) { [weak self] result in
+            guard let self = self else {
+                completion(false, NSError(domain: "Self is nil", code: -1, userInfo: nil), context)
+                return
+            }
+            
+            switch result {
+            case .success(let updatedContext):
+                var newContext = context
+                for (key, value) in updatedContext {
+                    if let nestedDict = value.value as? [String: Any] {
+                        // If the value is a nested dictionary, merge it with existing nested dictionary
+                        if var existingDict = newContext[key] as? [String: Any] {
+                            for (nestedKey, nestedValue) in nestedDict {
+                                existingDict[nestedKey] = nestedValue
+                            }
+                            newContext[key] = existingDict
+                        } else {
+                            newContext[key] = nestedDict
+                        }
+                    } else {
+                        newContext[key] = value.value
+                    }
+                }
+                print("Debug: Updated context after action \(index): \(newContext)")
+                // Proceed to the next action
+                self.executeActionsSequentially(actions: actions, index: index + 1, context: newContext, completion: completion)
+                
+            case .failure(let error):
+                print("Error executing action: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.uiComponents.append(UIComponent(type: "error", properties: ["text": AnyCodable(error.localizedDescription)]))
+                }
+                completion(false, error, context)
+            }
         }
-
-        return components
     }
 
-    func updateUI() {
-        DispatchQueue.main.async {
-            self.dynamicContent = AnyView(
-                DynamicUIRenderer(components: self.uiComponents, context: self.context)
-            )
-            self.objectWillChange.send()
+    private func formatTravelTime(_ seconds: Double) -> String {
+        let minutes = Int(seconds) / 60
+        let hours = minutes / 60
+        let remainingMinutes = minutes % 60
+        if hours > 0 {
+            return "\(hours)h \(remainingMinutes)m"
+        } else {
+            return "\(remainingMinutes)m"
         }
     }
+
+    private func formatTimeDifference(_ interval: TimeInterval) -> String {
+        let hours = Int(abs(interval)) / 3600
+        let minutes = (Int(abs(interval)) % 3600) / 60
+        let sign = interval >= 0 ? "+" : "-"
+        return "\(sign)\(hours)h \(minutes)m"
+    }
+
 }

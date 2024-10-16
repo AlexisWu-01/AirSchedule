@@ -11,13 +11,6 @@ struct Context {
     var data: [String: Any] = [:]
 }
 
-
-struct Meeting: Codable{
-    let title: String
-    let startTime: Date
-    let location: String
-}
-
 struct Weather: Codable {
     let condition: String
     let temperature: Int
