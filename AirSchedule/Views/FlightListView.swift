@@ -44,12 +44,18 @@ struct FlightListView: View {
     }
 
     private var flightSearchForm: some View {
-        Form {
-            Section(header: Text("Flight Search")) {
-                TextField("Departure Airport", text: $viewModel.departureAirport)
-                TextField("Arrival Airport", text: $viewModel.arrivalAirport)
-                DatePicker("Flight Date", selection: $viewModel.flightDate, displayedComponents: .date)
+        VStack(spacing: 16) {
+            HStack {
+                TextField("From", text: $viewModel.departureAirport)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                TextField("To", text: $viewModel.arrivalAirport)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                DatePicker("", selection: $viewModel.flightDate, displayedComponents: .date)
+                    .labelsHidden()
             }
+            .padding(.horizontal)
             
             Button(action: {
                 viewModel.fetchFlights()
@@ -58,8 +64,10 @@ struct FlightListView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(PrimaryButtonStyle())
+            .padding(.horizontal)
         }
-        .padding(.bottom)
+        .padding(.vertical)
+        .background(Color.white)
     }
 
     private var emptyStateView: some View {

@@ -114,38 +114,31 @@ class ActionExecutor {
         
         let fromCoordinate = getAirportCoordinate(for: flight.arrivalAirport)
         
-        geocodeAddress(eventLocation) { result in
+        MapsService.shared.getDirections(from: flight.arrivalAirport, to: eventLocation, arrivalTime: eventStartTime) { result in
             switch result {
-            case .success(let toCoordinate):
-                self.calculateTravelTime(from: fromCoordinate, to: toCoordinate) { travelTimeResult in
-                    switch travelTimeResult {
-                    case .success(let travelTime):
-                        let mapData: [String: AnyCodable] = [
-                            "fromLocation": AnyCodable(fromCoordinate),
-                            "toLocation": AnyCodable(toCoordinate),
-                            "travelTime": AnyCodable(travelTime)
-                        ]
-                        
-                        var updatedMeetingData = meetingAvailabilityData
-                        updatedMeetingData["fromCoordinate"] = AnyCodable(fromCoordinate)
-                        updatedMeetingData["toCoordinate"] = AnyCodable(toCoordinate)
-                        updatedMeetingData["travelTime"] = AnyCodable(travelTime)
-                        
-                        let arrivalTime = flight.actualArrivalTime ?? flight.arrivalTime
-                        let arrivalPlusTravel = arrivalTime.addingTimeInterval(travelTime+20*60)
-                        let canMakeIt = arrivalPlusTravel <= eventStartTime
-                        updatedMeetingData["canMakeIt"] = AnyCodable(canMakeIt)
-                        
-                        let combinedData: [String: AnyCodable] = [
-                            "mapData": AnyCodable(mapData),
-                            "meetingAvailabilityData": AnyCodable(updatedMeetingData)
-                        ]
-                        
-                        completion(.success(combinedData))
-                    case .failure(let error):
-                        completion(.failure(error))
-                    }
-                }
+            case .success(let route):
+                let mapData: [String: AnyCodable] = [
+                    "fromLocation": AnyCodable(fromCoordinate),
+                    "toLocation": AnyCodable(route.polyline.coordinate),
+                    "route": AnyCodable(route)
+                ]
+                
+                var updatedMeetingData = meetingAvailabilityData
+                updatedMeetingData["fromCoordinate"] = AnyCodable(fromCoordinate)
+                updatedMeetingData["toCoordinate"] = AnyCodable(route.polyline.coordinate)
+                updatedMeetingData["travelTime"] = AnyCodable(route.expectedTravelTime)
+                
+                let arrivalTime = flight.actualArrivalTime ?? flight.arrivalTime
+                let arrivalPlusTravel = arrivalTime.addingTimeInterval(route.expectedTravelTime + 20*60)
+                let canMakeIt = arrivalPlusTravel <= eventStartTime
+                updatedMeetingData["canMakeIt"] = AnyCodable(canMakeIt)
+                
+                let combinedData: [String: AnyCodable] = [
+                    "mapData": AnyCodable(mapData),
+                    "meetingAvailabilityData": AnyCodable(updatedMeetingData)
+                ]
+                
+                completion(.success(combinedData))
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -162,37 +155,6 @@ class ActionExecutor {
         ]
         
         return airportCoordinates[code] ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
-    }
-    
-    private func geocodeAddress(_ address: String, completion: @escaping (Result<CLLocationCoordinate2D, Error>) -> Void) {
-        let geocoder = CLGeocoder()
-        geocoder.geocodeAddressString(address) { placemarks, error in
-            if let error = error {
-                completion(.failure(error))
-            } else if let location = placemarks?.first?.location {
-                completion(.success(location.coordinate))
-            } else {
-                completion(.failure(APIError.noData))
-            }
-        }
-    }
-    
-    private func calculateTravelTime(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D, completion: @escaping (Result<TimeInterval, Error>) -> Void) {
-        let request = MKDirections.Request()
-        request.source = MKMapItem(placemark: MKPlacemark(coordinate: from))
-        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: to))
-        request.transportType = .automobile
-
-        let directions = MKDirections(request: request)
-        directions.calculate { response, error in
-            if let error = error {
-                completion(.failure(error))
-            } else if let route = response?.routes.first {
-                completion(.success(route.expectedTravelTime))
-            } else {
-                completion(.failure(APIError.noData))
-            }
-        }
     }
     
     private func handleWeatherAction(_ action: Action, context: [String: Any], completion: @escaping (Result<[String: AnyCodable], Error>) -> Void) {

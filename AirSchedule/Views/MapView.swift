@@ -8,42 +8,54 @@
 import SwiftUI
 import MapKit
 
-struct CustomMapView: View {
-    let route: MKRoute
-    let sourceCoordinate: CLLocationCoordinate2D
-    let destinationCoordinate: CLLocationCoordinate2D
-    
+struct MapLocationView: View {
+    let fromCoordinate: CLLocationCoordinate2D
+    let toCoordinate: CLLocationCoordinate2D
+    @State private var route: MKRoute?
     @State private var region: MKCoordinateRegion
-    @State private var annotations: [MapAnnotation]
     
-    init(route: MKRoute, sourceCoordinate: CLLocationCoordinate2D, destinationCoordinate: CLLocationCoordinate2D) {
-        self.route = route
-        self.sourceCoordinate = sourceCoordinate
-        self.destinationCoordinate = destinationCoordinate
-        
+    init(fromCoordinate: CLLocationCoordinate2D, toCoordinate: CLLocationCoordinate2D) {
+        self.fromCoordinate = fromCoordinate
+        self.toCoordinate = toCoordinate
         let center = CLLocationCoordinate2D(
-            latitude: (sourceCoordinate.latitude + destinationCoordinate.latitude) / 2,
-            longitude: (sourceCoordinate.longitude + destinationCoordinate.longitude) / 2
+            latitude: (fromCoordinate.latitude + toCoordinate.latitude) / 2,
+            longitude: (fromCoordinate.longitude + toCoordinate.longitude) / 2
         )
         let span = MKCoordinateSpan(
-            latitudeDelta: abs(sourceCoordinate.latitude - destinationCoordinate.latitude) * 1.5,
-            longitudeDelta: abs(sourceCoordinate.longitude - destinationCoordinate.longitude) * 1.5
+            latitudeDelta: abs(fromCoordinate.latitude - toCoordinate.latitude) * 1.5,
+            longitudeDelta: abs(fromCoordinate.longitude - toCoordinate.longitude) * 1.5
         )
         _region = State(initialValue: MKCoordinateRegion(center: center, span: span))
-        
-        _annotations = State(initialValue: [
-            MapAnnotation(coordinate: sourceCoordinate, title: "Start"),
-            MapAnnotation(coordinate: destinationCoordinate, title: "End")
-        ])
     }
     
     var body: some View {
-        Map(coordinateRegion: $region, annotationItems: annotations) { annotation in
+        Map(coordinateRegion: $region, annotationItems: [
+            MapAnnotation(coordinate: fromCoordinate, title: "Start"),
+            MapAnnotation(coordinate: toCoordinate, title: "End")
+        ]) { annotation in
             MapMarker(coordinate: annotation.coordinate, tint: annotation.title == "Start" ? .green : .red)
         }
         .overlay(
-            MapOverlay(route: route)
+            route.map { route in
+                MapOverlay(route: route)
+            }
         )
+        .onAppear {
+            calculateRoute()
+        }
+    }
+    
+    private func calculateRoute() {
+        let request = MKDirections.Request()
+        request.source = MKMapItem(placemark: MKPlacemark(coordinate: fromCoordinate))
+        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: toCoordinate))
+        
+        let directions = MKDirections(request: request)
+        directions.calculate { response, error in
+            if let route = response?.routes.first {
+                self.route = route
+            }
+        }
     }
 }
 
@@ -96,14 +108,11 @@ extension MKPolyline {
     }
 }
 
-
-
 struct CustomMapView_Previews: PreviewProvider {
     static var previews: some View {
-        CustomMapView(
-            route: MKRoute(),
-            sourceCoordinate: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
-            destinationCoordinate: CLLocationCoordinate2D(latitude: 37.3382, longitude: -121.8863)
+        MapLocationView(
+            fromCoordinate: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
+            toCoordinate: CLLocationCoordinate2D(latitude: 37.3382, longitude: -121.8863)
         )
     }
 }

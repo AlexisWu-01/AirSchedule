@@ -154,75 +154,7 @@ struct DynamicUIRenderer: View {
     }
 }
 
-// MARK: - MapLocationView with MapOverlay Integration
-struct MapLocationView: View {
-    let fromCoordinate: CLLocationCoordinate2D
-    let toCoordinate: CLLocationCoordinate2D
-    @State private var route: MKRoute?
-    @State private var isLoading = true
-    @State private var errorMessage: String?
-    @State private var travelTime: TimeInterval?
 
-    var body: some View {
-        ZStack {
-            if let route = route {
-                CustomMapView(route: route, sourceCoordinate: fromCoordinate, destinationCoordinate: toCoordinate)
-            } else {
-                Map(coordinateRegion: .constant(MKCoordinateRegion(
-                    center: CLLocationCoordinate2D(
-                        latitude: (fromCoordinate.latitude + toCoordinate.latitude) / 2,
-                        longitude: (fromCoordinate.longitude + toCoordinate.longitude) / 2
-                    ),
-                    span: MKCoordinateSpan(
-                        latitudeDelta: abs(fromCoordinate.latitude - toCoordinate.latitude) * 1.5,
-                        longitudeDelta: abs(fromCoordinate.longitude - toCoordinate.longitude) * 1.5
-                    )
-                )), annotationItems: [
-                    MapAnnotation(coordinate: fromCoordinate, title: "Start"),
-                    MapAnnotation(coordinate: toCoordinate, title: "End")
-                ]) { annotation in
-                    MapMarker(coordinate: annotation.coordinate, tint: annotation.title == "Start" ? .green : .red)
-                }
-            }
-            if isLoading {
-                ProgressView()
-            }
-            if let errorMessage = errorMessage {
-                Text(errorMessage)
-                    .foregroundColor(.red)
-            }
-        }
-        .frame(height: 300)
-        .cornerRadius(10)
-        .onAppear(perform: loadRoute)
-    }
-
-    private func loadRoute() {
-        print("Debug: Starting loadRoute")
-        let request = MKDirections.Request()
-        request.source = MKMapItem(placemark: MKPlacemark(coordinate: fromCoordinate))
-        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: toCoordinate))
-        request.transportType = .automobile
-
-        let directions = MKDirections(request: request)
-        directions.calculate { response, error in
-            DispatchQueue.main.async {
-                self.isLoading = false
-                if let error = error {
-                    self.errorMessage = error.localizedDescription
-                    print("Debug: Error loading route - \(error.localizedDescription)")
-                } else if let route = response?.routes.first {
-                    print("Debug: Successfully loaded route")
-                    self.route = route
-                    self.travelTime = route.expectedTravelTime
-                } else {
-                    self.errorMessage = "No route found"
-                    print("Debug: No route found")
-                }
-            }
-        }
-    }
-}
 
 struct ImprovedTextView: View {
     let content: String

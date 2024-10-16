@@ -84,7 +84,6 @@ class MapsService {
     }
     
     private func geocodeLocationWithRetry(_ location: String, retryCount: Int, completion: @escaping (Result<MKMapItem, Error>) -> Void) {
-        print("Debug: Geocoding location: \(location)")
         if location.count == 3 { // Assuming it's an airport code
             getAirportCoordinate(for: location) { result in
                 switch result {
@@ -92,18 +91,14 @@ class MapsService {
                     let placemark = MKPlacemark(coordinate: coordinate)
                     completion(.success(MKMapItem(placemark: placemark)))
                 case .failure(let error):
-                    print("Debug: Airport coordinate lookup failed: \(error.localizedDescription)")
                     completion(.failure(error))
                 }
             }
         } else {
             let cleanedLocation = location.replacingOccurrences(of: "\n", with: ", ")
-            print("Debug: Geocoding address: \(cleanedLocation)")
             geocoder.geocodeAddressString(cleanedLocation) { placemarks, error in
                 if let error = error {
-                    print("Debug: Geocoding error: \(error.localizedDescription)")
                     if retryCount > 0 {
-                        print("Debug: Retrying geocoding. Attempts left: \(retryCount - 1)")
                         DispatchQueue.global().asyncAfter(deadline: .now() + 2.0) {
                             self.geocodeLocationWithRetry(location, retryCount: retryCount - 1, completion: completion)
                         }
@@ -111,10 +106,8 @@ class MapsService {
                         completion(.failure(error))
                     }
                 } else if let placemark = placemarks?.first {
-                    print("Debug: Geocoding successful")
                     completion(.success(MKMapItem(placemark: MKPlacemark(placemark: placemark))))
                 } else {
-                    print("Debug: No placemark found")
                     completion(.failure(APIError.noData))
                 }
             }
@@ -132,10 +125,8 @@ class MapsService {
         ]
         
         if let coordinate = airportCoordinates[uppercasedCode] {
-            print("Debug: Found coordinate for airport code \(uppercasedCode)")
             completion(.success(coordinate))
         } else {
-            print("Debug: Unknown airport code: \(uppercasedCode)")
             completion(.failure(APIError.invalidParameters))
         }
     }

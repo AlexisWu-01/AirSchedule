@@ -62,13 +62,14 @@ class FlightDetailViewModel: ObservableObject {
                 }
                 print("Debug: Final updated context in FlightDetailViewModel: \(self.context)")
                 
-                // Update UI components using the updateUIComponents closure
+                // Update UI components using the updated context
                 var updatedUIComponents = actionPlan.uiComponents
                 for i in 0..<updatedUIComponents.count {
-                    if updatedUIComponents[i].type == "weather",
-                       let weatherData = self.context["weatherData"]?.value as? [String: AnyCodable] {
-                        updatedUIComponents[i].properties["weatherData"] = AnyCodable(weatherData)
+                    if updatedUIComponents[i].type == "meetingAvailability",
+                       let meetingData = self.context["meetingAvailabilityData"]?.value as? [String: AnyCodable] {
+                        updatedUIComponents[i].properties = meetingData
                     }
+                    // Add similar checks for other component types if needed
                 }
                 
                 print("Debug: Updated UI components: \(updatedUIComponents)")

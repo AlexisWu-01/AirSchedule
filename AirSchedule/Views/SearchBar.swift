@@ -16,37 +16,36 @@ struct SearchBar: View {
             TextField("Search flights", text: $text)
                 .padding(7)
                 .padding(.horizontal, 25)
-                .background(Color.white)
+                .background(Color(.systemGray6))
                 .cornerRadius(8)
                 .overlay(
                     HStack {
                         Image(systemName: "magnifyingglass")
-                            .foregroundColor(.airBlue)
+                            .foregroundColor(.gray)
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                             .padding(.leading, 8)
                         
                         if !text.isEmpty {
                             Button(action: {
                                 self.text = ""
+                                onSearchButtonClicked()
                             }) {
                                 Image(systemName: "multiply.circle.fill")
-                                    .foregroundColor(.airDarkGray)
+                                    .foregroundColor(.gray)
                                     .padding(.trailing, 8)
                             }
                         }
                     }
                 )
-                .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
+                .padding(.horizontal, 10)
             
-            Button("Search") {
-                onSearchButtonClicked()
+            if !text.isEmpty {
+                Button("Search") {
+                    onSearchButtonClicked()
+                }
+                .padding(.trailing, 10)
             }
-            .foregroundColor(.white)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(Color.airBlue)
-            .cornerRadius(8)
-            .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
         }
     }
 }
+

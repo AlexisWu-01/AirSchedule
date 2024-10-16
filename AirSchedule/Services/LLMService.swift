@@ -247,7 +247,7 @@ class LLMService {
                 "properties": {
                     "canMakeIt": true, // Dynamically set based on calendar and map data
                     "travelTime": 30, // Dynamically set based on calendar and map data
-                    "message": "The travel time is 30 minutes. You will be able to make it to the meeting on time."
+                    "content": "The travel time is 30 minutes. You will be able to make it to the meeting on time."
                 }
                 }
             ]

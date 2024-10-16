@@ -87,10 +87,12 @@ AirSchedule employs a modular and scalable architecture, ensuring flexibility, h
 ### System Diagram
 
 ![System Diagram](https://github.com/AlexisWu-01/AirSchedule/raw/main/demo/architecture_diagram.svg)
+<sub><i>Click the image to zoom</i></sub>
 
 ### Workflow Diagram
 
 ![Workflow Diagram](https://github.com/AlexisWu-01/AirSchedule/raw/main/demo/workflow_diagram.svg)
+<sub><i>Click the image to zoom</i></sub>
 
 ### Key Components
 
