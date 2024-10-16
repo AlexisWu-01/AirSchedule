@@ -91,6 +91,7 @@ class LLMService {
             - **list**: Presents items in a list format.
             - **map**: Displays map views.
             - **image**: Shows images or logos.
+            - **meetingAvailability**: Displays meeting availability information with flight details.
 
             **Objective:**
             Interpret the user's query and generate an action plan in JSON format containing:
@@ -222,6 +223,14 @@ class LLMService {
                 }
             ],
             "ui_components": [
+            {
+            type": "meetingAvailability",
+                "properties": {
+                "title": "Apple Meeting",
+                "time": "2024-10-15T15:30:00Z",
+                "location": "Apple Park, Cupertino, CA"
+                }
+                },
                 {
                 "type": "text",
                 "properties": {

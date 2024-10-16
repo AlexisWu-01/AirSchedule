@@ -18,7 +18,7 @@ struct FlightDetailView: View {
                 flightDetails
 
                 // Dynamic UI Components
-                viewModel.dynamicContent
+                DynamicUIRenderer(uiComponents: viewModel.uiComponents)
 
                 // User Query Input
                 userQueryInput

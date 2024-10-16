@@ -46,56 +46,22 @@ struct MapView: View {
     let toCoordinate: CLLocationCoordinate2D
     
     init(fromCoordinate: CLLocationCoordinate2D, toCoordinate: CLLocationCoordinate2D) {
-        self.fromCoordinate = fromCoordinate
-        self.toCoordinate = toCoordinate
-        _region = State(initialValue: MKCoordinateRegion(
-            center: fromCoordinate,
-            span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
-        ))
-    }
-    
-    var body: some View {
-        VStack {
-            ZStack {
-                Map(coordinateRegion: $region, annotationItems: annotations) { annotation in
-                    MapAnnotation(coordinate: annotation.coordinate) {
-                        Circle()
-                            .fill(annotation.color)
-                            .frame(width: 10, height: 10)
-                    }
-                }
-                .overlay {
-                    if let route = route {
-                        PolylineOverlay(route: route)
-                            .stroke(Color.blue, lineWidth: 3)
-                    }
-                }
+            self.fromCoordinate = fromCoordinate
+            self.toCoordinate = toCoordinate
+            _region = State(initialValue: MKCoordinateRegion(
+                center: fromCoordinate,
+                span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
+            ))
+        }
+
+        var body: some View {
+            Map(coordinateRegion: $region)
                 .frame(height: 300)
                 .cornerRadius(10)
-                
-                if route == nil {
-                    ProgressView("Calculating Route...")
-                        .padding()
-                        .background(Color.white.opacity(0.8))
-                        .cornerRadius(8)
+                .onAppear {
+                    print("MapView appeared with from: \(fromCoordinate) to: \(toCoordinate)")
                 }
-            }
-            .padding()
-            
-            if let travelTime = travelTime {
-                Text("Estimated Travel Time: \(formatTravelTime(travelTime))")
-                    .padding(.top, 5)
-            }
         }
-        .onAppear {
-            calculateRoute()
-        }
-        .alert(isPresented: $showingError) {
-            Alert(title: Text("Error"),
-                  message: Text(errorMessage),
-                  dismissButton: .default(Text("OK")))
-        }
-    }
     
     private func calculateRoute() {
         let request = MKDirections.Request()
@@ -123,6 +89,16 @@ struct MapView: View {
                     CustomAnnotation(coordinate: self.toCoordinate, color: .green)
                 ]
             }
+            DispatchQueue.main.async {
+                self.route = route
+                self.travelTime = route.expectedTravelTime
+                self.annotations = [
+                    CustomAnnotation(coordinate: fromCoordinate, color: .red),
+                    CustomAnnotation(coordinate: toCoordinate, color: .green)
+                ]
+                print("Debug: State updated with route and annotations.")
+            }
+
         }
     }
     

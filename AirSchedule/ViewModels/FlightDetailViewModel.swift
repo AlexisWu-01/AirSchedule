@@ -10,7 +10,6 @@ import Combine
 
 class FlightDetailViewModel: ObservableObject {
     @Published var flight: Flight
-    @Published var dynamicContent: AnyView = AnyView(EmptyView())
     @Published var uiComponents: [UIComponent] = []
     @Published var context: [String: AnyCodable] = [:]
 
@@ -25,7 +24,6 @@ class FlightDetailViewModel: ObservableObject {
             for (index, component) in self.uiComponents.enumerated() {
                 print("Debug: Component \(index) - Type: \(component.type)")
             }
-            self.dynamicContent = AnyView(DynamicUIRenderer(uiComponents: self.uiComponents))
             print("Debug: DynamicContent updated")
         }
     }

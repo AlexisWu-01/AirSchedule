@@ -68,7 +68,6 @@ class ActionExecutor {
         // Implement flight data action handling
         DispatchQueue.global().async {
             // Simulate fetching flight status
-            // Replace this with actual flight API integration
             guard let flightNumber = action.parameters?["flightNumber"]?.value as? String else {
                 completion(.failure(APIError.invalidParameters))
                 return
@@ -114,7 +113,29 @@ class ActionExecutor {
                     "travelTime": AnyCodable(travelTime),
                     "route": AnyCodable(route)
                 ]
-                completion(.success(mapData))
+                
+                let calendarData = context["calendarData"] as? [String: AnyCodable] ?? [:]
+                let events = calendarData["events"] as? [[String: AnyCodable]] ?? []
+                var meetingAvailabilityData: [String: AnyCodable] = [:]
+                
+                if let nextEvent = events.first {
+                    let title = nextEvent["title"]?.value as? String ?? "Untitled Event"
+                    let startTime = nextEvent["startDate"]?.value as? Date ?? Date()
+                    let location = nextEvent["location"]?.value as? String ?? "Unknown Location"
+                    
+                    meetingAvailabilityData = [
+                        "title": AnyCodable(title),
+                        "time": AnyCodable(ISO8601DateFormatter().string(from: startTime)),
+                        "location": AnyCodable(location)
+                    ]
+                }
+                
+                let combinedData: [String: AnyCodable] = [
+                    "mapData": AnyCodable(mapData),
+                    "meetingAvailabilityData": AnyCodable(meetingAvailabilityData)
+                ]
+                
+                completion(.success(combinedData))
             case .failure(let error):
                 print("Debug: Maps action failed: \(error.localizedDescription)")
                 completion(.failure(error))

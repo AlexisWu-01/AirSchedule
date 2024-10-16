@@ -37,28 +37,28 @@ struct DynamicUIRenderer: View {
     private func renderComponent(_ component: UIComponent, index: Int) -> some View {
         switch component.type {
         case "text":
-            if let text = component.properties["text"]?.value as? String {
-                Text(text)
-                    .onAppear { print("Debug: Rendering text component \(index): \(text)") }
-            } else if let content = component.properties["content"]?.value as? String {
+            if let content = component.properties["content"]?.value as? String {
                 Text(content)
                     .onAppear { print("Debug: Rendering text component \(index): \(content)") }
+            } else if let canMakeIt = component.properties["canMakeIt"]?.value as? Bool,
+                      let message = component.properties["message"]?.value as? String {
+                Text(message)
+                    .foregroundColor(canMakeIt ? .green : .red)
+                    .onAppear { print("Debug: Rendering text component \(index): \(message)") }
             } else {
                 Text("Invalid text component")
                     .foregroundColor(.red)
                     .onAppear { print("Debug: Invalid text component \(index)") }
             }
         case "map":
-            if let fromLocation = component.properties["fromLocation"]?.value as? CLLocationCoordinate2D,
-               let toLocation = component.properties["toLocation"]?.value as? CLLocationCoordinate2D {
-                MapView(fromCoordinate: fromLocation, toCoordinate: toLocation)
-                    .frame(height: 300)
-                    .cornerRadius(10)
+            if let from = component.properties["from"]?.value as? String,
+               let to = component.properties["to"]?.value as? String {
+                Text("Map from \(from) to \(to)")
                     .onAppear { print("Debug: Rendering map component \(index)") }
             } else {
                 Text("Invalid map component")
                     .foregroundColor(.red)
-                    .onAppear { print("Debug: Invalid map component \(index)") }
+                    .onAppear { print("Debug: Invalid map component: Missing or invalid coordinates.") }
             }
         case "error":
             if let errorText = component.properties["text"]?.value as? String {
@@ -66,126 +66,95 @@ struct DynamicUIRenderer: View {
                     .foregroundColor(.red)
                     .onAppear { print("Debug: Rendering error component \(index): \(errorText)") }
             }
+        case "meetingAvailability":
+            if let meetingData = component.properties["meetingAvailabilityData"]?.value as? [String: AnyCodable],
+               let title = meetingData["title"]?.value as? String,
+               let timeString = meetingData["time"]?.value as? String,
+               let location = meetingData["location"]?.value as? String {
+                
+                let dateFormatter = ISO8601DateFormatter()
+                let time = dateFormatter.date(from: timeString) ?? Date()
+                
+                MeetingAvailabilityView(
+                    title: title,
+                    time: time,
+                    location: location
+                )
+                .onAppear { print("Debug: Rendering meeting availability component") }
+            } else {
+                Text("No upcoming meetings found")
+                    .foregroundColor(.gray)
+                    .onAppear { print("Debug: No meeting data available") }
+            }
         default:
             Text("Unknown component type: \(component.type)")
                 .foregroundColor(.orange)
                 .onAppear { print("Debug: Unknown component type \(index): \(component.type)") }
         }
     }
-}
-
-// Example UI Components
-
-struct LegroomStatusView: View {
-    let legroom: String
     
-    var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text("Legroom Information")
-                .font(.headline)
-            Text(legroom)
-                .font(.body)
+    
+    // Example UI Components
+    
+    struct LegroomStatusView: View {
+        let legroom: String
+        
+        var body: some View {
+            VStack(alignment: .leading, spacing: 5) {
+                Text("Legroom Information")
+                    .font(.headline)
+                Text(legroom)
+                    .font(.body)
+            }
+            .padding()
+            .background(Color.green.opacity(0.1))
+            .cornerRadius(10)
         }
-        .padding()
-        .background(Color.green.opacity(0.1))
-        .cornerRadius(10)
     }
-}
-
-struct CarbonEmissionsChartView: View {
-    let emissions: CarbonEmissions
     
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Carbon Emissions")
-                .font(.headline)
+    struct CarbonEmissionsChartView: View {
+        let emissions: CarbonEmissions
+        
+        var body: some View {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Carbon Emissions")
+                    .font(.headline)
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("This Flight:")
+                        Text("Typical for Route:")
+                        Text("Difference:")
+                    }
+                    VStack(alignment: .trailing) {
+                        Text("\(emissions.this_flight) kg")
+                        Text("\(emissions.typical_for_this_route) kg")
+                        Text("\(emissions.difference_percent)%")
+                            .foregroundColor(emissions.difference_percent < 0 ? .green : .red)
+                    }
+                }
+            }
+            .padding()
+            .background(Color.blue.opacity(0.1))
+            .cornerRadius(10)
+        }
+    }
+    
+    
+    
+    // Weather View
+    struct WeatherView: View {
+        let weatherDescription: String
+        
+        var body: some View {
             HStack {
-                VStack(alignment: .leading) {
-                    Text("This Flight:")
-                    Text("Typical for Route:")
-                    Text("Difference:")
-                }
-                VStack(alignment: .trailing) {
-                    Text("\(emissions.this_flight) kg")
-                    Text("\(emissions.typical_for_this_route) kg")
-                    Text("\(emissions.difference_percent)%")
-                        .foregroundColor(emissions.difference_percent < 0 ? .green : .red)
-                }
-            }
-        }
-        .padding()
-        .background(Color.blue.opacity(0.1))
-        .cornerRadius(10)
-    }
-}
-
-struct MeetingAvailabilityView: View {
-    let canMakeIt: Bool
-    let event: String
-    let flightArrivalTime: Date
-    let eventStartTime: Date
-    let timeDifference: TimeInterval
-    let message: String?
-    let arrivalAirport: String
-    let eventLocation: String
-    let travelTime: String?
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text("Meeting Availability")
-                .font(.headline)
-            Text("Event: \(event)")
-            Text("Flight Arrival: \(formattedDate(flightArrivalTime)) at \(arrivalAirport)")
-            Text("Meeting Start: \(formattedDate(eventStartTime)) at \(eventLocation)")
-            if let message = message {
-                Text(message)
+                Image(systemName: "sun.max.fill")
+                    .foregroundColor(.yellow)
+                Text("Weather: \(weatherDescription)")
                     .font(.body)
-                    .foregroundColor(canMakeIt ? .green : .red)
-            } else {
-                Text(canMakeIt ? "You can make it to your meeting!" : "You might not make it to your meeting.")
-                    .font(.body)
-                    .foregroundColor(canMakeIt ? .green : .red)
             }
-            Text("Time difference: \(formatTimeDifference(timeDifference))")
-            
-            // Display Estimated Travel Time if available
-            if let travelTime = travelTime {
-                Text("Estimated Travel Time: \(travelTime)")
-                    .padding(.bottom, 5)
-            }
+            .padding()
+            .background(Color.orange.opacity(0.1))
+            .cornerRadius(8)
         }
-        .padding()
-        .background(canMakeIt ? Color.green.opacity(0.1) : Color.red.opacity(0.1))
-        .cornerRadius(10)
-    }
-    
-    // Helper function to format Date to String
-    private func formattedDate(_ date: Date) -> String {
-        return DateFormatter.shortDateTime.string(from: date)
-    }
-    
-    // Helper function to format TimeInterval to String
-    private func formatTimeDifference(_ interval: TimeInterval) -> String {
-        let hours = Int(abs(interval)) / 3600
-        let minutes = (Int(abs(interval)) % 3600) / 60
-        let sign = interval >= 0 ? "+" : "-"
-        return "\(sign)\(hours)h \(minutes)m"
-    }
-}
-
-// Weather View
-struct WeatherView: View {
-    let weatherDescription: String
-    
-    var body: some View {
-        HStack {
-            Image(systemName: "sun.max.fill")
-                .foregroundColor(.yellow)
-            Text("Weather: \(weatherDescription)")
-                .font(.body)
-        }
-        .padding()
-        .background(Color.orange.opacity(0.1))
-        .cornerRadius(8)
     }
 }
