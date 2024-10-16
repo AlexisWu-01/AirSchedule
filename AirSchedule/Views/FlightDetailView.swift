@@ -19,6 +19,12 @@ struct FlightDetailView: View {
 
                 // Dynamic UI Components
                 DynamicUIRenderer(uiComponents: viewModel.uiComponents)
+                    .onAppear {
+                        print("Debug: DynamicUIRenderer in FlightDetailView with \(viewModel.uiComponents.count) components")
+                        for (index, component) in viewModel.uiComponents.enumerated() {
+                            print("Debug: Component \(index) - Type: \(component.type), Properties: \(component.properties)")
+                        }
+                    }
 
                 // User Query Input
                 userQueryInput
@@ -26,6 +32,9 @@ struct FlightDetailView: View {
             .padding()
         }
         .navigationBarTitle("Flight Details", displayMode: .inline)
+        .onAppear {
+            print("Debug: FlightDetailView appeared")
+        }
     }
 
     private var flightHeader: some View {

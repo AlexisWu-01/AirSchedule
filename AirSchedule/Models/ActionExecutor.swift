@@ -53,16 +53,27 @@ class ActionExecutor {
             CalendarService.shared.checkAvailability(event: event, time: nil, flightArrivalTime: flightArrivalTime) { result in
                 switch result {
                 case .success(let availabilityInfo):
-                    let eventDetails: [String: AnyCodable] = [
-                        "eventStartTime": AnyCodable(availabilityInfo["eventStartTime"] as? Date ?? Date()),
-                        "isAvailable": AnyCodable(availabilityInfo["isAvailable"] as? Bool ?? false),
-                        "event": AnyCodable(availabilityInfo["event"] as? String ?? ""),
-                        "eventLocation": AnyCodable(availabilityInfo["eventLocation"] as? String ?? "Unknown"),
-                        "flightArrivalTime": AnyCodable(availabilityInfo["flightArrivalTime"] as? Date ?? Date()),
-                        "timeDifference": AnyCodable(availabilityInfo["timeDifference"] as? TimeInterval ?? 0)
-                    ]
-                    completion(.success(eventDetails))
+                    if let eventStartTime = availabilityInfo["eventStartTime"] as? Date {
+                        let meetingAvailabilityData: [String: AnyCodable] = [
+                            "title": AnyCodable(availabilityInfo["event"] as? String ?? ""),
+                            "time": AnyCodable(ISO8601DateFormatter().string(from: eventStartTime)),
+                            "location": AnyCodable(availabilityInfo["eventLocation"] as? String ?? "Unknown"),
+                            "isAvailable": AnyCodable(availabilityInfo["isAvailable"] as? Bool ?? false),
+                            "flightArrivalTime": AnyCodable(ISO8601DateFormatter().string(from: flightArrivalTime))
+                        ]
+                        
+                        let updatedContext: [String: AnyCodable] = [
+                            "meetingAvailabilityData": AnyCodable(meetingAvailabilityData)
+                        ]
+                        
+                        print("Debug: Meeting availability data: \(meetingAvailabilityData)")
+                        completion(.success(updatedContext))
+                    } else {
+                        print("Debug: No matching event found")
+                        completion(.success([:]))
+                    }
                 case .failure(let error):
+                    print("Debug: Calendar action failed with error: \(error.localizedDescription)")
                     completion(.failure(error))
                 }
             }
@@ -95,17 +106,17 @@ class ActionExecutor {
             return
         }
         
-        guard let eventLocation = context["eventLocation"] as? String else {
-            print("Error: Missing eventLocation in context")
+        guard let meetingAvailabilityData = context["meetingAvailabilityData"] as? [String: AnyCodable],
+              let eventLocation = meetingAvailabilityData["location"]?.value as? String else {
+            print("Error: Missing eventLocation in meetingAvailabilityData")
             completion(.failure(APIError.invalidParameters))
             return
         }
         
-        let from = flight.arrivalAirport // Use the flight's arrival airport
+        let from = flight.arrivalAirport
         let to = eventLocation
-        let arrivalTime = flight.actualArrivalTime
+        let arrivalTime = flight.actualArrivalTime ?? flight.arrivalTime
         
-        // Use MapsService to fetch directions
         MapsService.shared.getDirections(from: from, to: to, arrivalTime: arrivalTime) { result in
             switch result {
             case .success(let (route, travelTime, sourceCoordinate, destinationCoordinate)):
@@ -116,22 +127,6 @@ class ActionExecutor {
                     "route": AnyCodable(route)
                 ]
                 
-                let calendarData = context["calendarData"] as? [String: AnyCodable] ?? [:]
-                let events = calendarData["events"] as? [[String: AnyCodable]] ?? []
-                var meetingAvailabilityData: [String: AnyCodable] = [:]
-                
-                if let nextEvent = events.first {
-                    let title = nextEvent["title"]?.value as? String ?? "Untitled Event"
-                    let startTime = nextEvent["startDate"]?.value as? Date ?? Date()
-                    let location = nextEvent["location"]?.value as? String ?? "Unknown Location"
-                    
-                    meetingAvailabilityData = [
-                        "title": AnyCodable(title),
-                        "time": AnyCodable(ISO8601DateFormatter().string(from: startTime)),
-                        "location": AnyCodable(location)
-                    ]
-                }
-                
                 let combinedData: [String: AnyCodable] = [
                     "mapData": AnyCodable(mapData),
                     "meetingAvailabilityData": AnyCodable(meetingAvailabilityData)
@@ -139,7 +134,6 @@ class ActionExecutor {
                 
                 completion(.success(combinedData))
             case .failure(let error):
-                print("Debug: Maps action failed: \(error.localizedDescription)")
                 completion(.failure(error))
             }
         }

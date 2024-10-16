@@ -24,7 +24,7 @@ class FlightDetailViewModel: ObservableObject {
             for (index, component) in self.uiComponents.enumerated() {
                 print("Debug: Component \(index) - Type: \(component.type)")
             }
-            print("Debug: DynamicContent updated")
+            self.objectWillChange.send()
         }
     }
 
@@ -52,15 +52,19 @@ class FlightDetailViewModel: ObservableObject {
     }
 
     func executeActionPlan(_ actionPlan: ActionPlan, completion: @escaping (Bool, Error?) -> Void) {
-        var contextAny: [String: Any] = ["flight": flight]
-        DispatchQueue.main.async {
-            self.uiComponents = actionPlan.uiComponents ?? []
-            self.updateUI()
-        }
+        var contextAny: [String: Any] = self.context.mapValues { $0.value }
         executeActionsSequentially(actions: actionPlan.actions ?? [], index: 0, context: contextAny) { success, error, updatedContext in
             DispatchQueue.main.async {
-                self.context = updatedContext.mapValues { AnyCodable($0) }
+                // Merge the updated context with the existing context
+                for (key, value) in updatedContext {
+                    self.context[key] = AnyCodable(value)
+                }
+                print("Debug: Updated context in FlightDetailViewModel: \(self.context)")
+                
+                // Update UI components after all actions are executed
+                self.uiComponents = actionPlan.uiComponents ?? []
                 self.updateUI()
+                
                 completion(success, error)
             }
         }
@@ -85,11 +89,21 @@ class FlightDetailViewModel: ObservableObject {
             case .success(let updatedContext):
                 var newContext = context
                 for (key, value) in updatedContext {
-                    newContext[key] = value.value
+                    if let nestedDict = value.value as? [String: Any] {
+                        // If the value is a nested dictionary, merge it with existing nested dictionary
+                        if var existingDict = newContext[key] as? [String: Any] {
+                            for (nestedKey, nestedValue) in nestedDict {
+                                existingDict[nestedKey] = nestedValue
+                            }
+                            newContext[key] = existingDict
+                        } else {
+                            newContext[key] = nestedDict
+                        }
+                    } else {
+                        newContext[key] = value.value
+                    }
                 }
-                DispatchQueue.main.async {
-                    self.context = updatedContext
-                }
+                print("Debug: Updated context after action \(index): \(newContext)")
                 // Proceed to the next action
                 self.executeActionsSequentially(actions: actions, index: index + 1, context: newContext, completion: completion)
                 

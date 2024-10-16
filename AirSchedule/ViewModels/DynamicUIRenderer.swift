@@ -23,6 +23,9 @@ struct DynamicUIRenderer: View {
     
     var body: some View {
         VStack(spacing: 20) {
+            Text("Debug: DynamicUIRenderer with \(uiComponents.count) components")
+                .foregroundColor(.red)
+            
             ForEach(uiComponents.indices, id: \.self) { index in
                 renderComponent(uiComponents[index], index: index)
             }
@@ -30,6 +33,9 @@ struct DynamicUIRenderer: View {
         .padding()
         .onAppear {
             print("Debug: DynamicUIRenderer appeared with \(uiComponents.count) components")
+            for (index, component) in uiComponents.enumerated() {
+                print("Debug: Component \(index) - Type: \(component.type)")
+            }
         }
     }
     
@@ -67,24 +73,13 @@ struct DynamicUIRenderer: View {
                     .onAppear { print("Debug: Rendering error component \(index): \(errorText)") }
             }
         case "meetingAvailability":
-            if let meetingData = component.properties["meetingAvailabilityData"]?.value as? [String: AnyCodable],
-               let title = meetingData["title"]?.value as? String,
-               let timeString = meetingData["time"]?.value as? String,
-               let location = meetingData["location"]?.value as? String {
-                
-                let dateFormatter = ISO8601DateFormatter()
-                let time = dateFormatter.date(from: timeString) ?? Date()
-                
-                MeetingAvailabilityView(
-                    title: title,
-                    time: time,
-                    location: location
-                )
-                .onAppear { print("Debug: Rendering meeting availability component") }
+            if let meetingData = component.properties as? [String: AnyCodable] {
+                MeetingAvailabilityView(meetingData: meetingData)
+                    .onAppear { print("Debug: Rendering meeting availability component with data: \(meetingData)") }
             } else {
-                Text("No upcoming meetings found")
+                Text("No meeting data available")
                     .foregroundColor(.gray)
-                    .onAppear { print("Debug: No meeting data available") }
+                    .onAppear { print("Debug: No meeting data available. Raw data: \(component.properties)") }
             }
         default:
             Text("Unknown component type: \(component.type)")
