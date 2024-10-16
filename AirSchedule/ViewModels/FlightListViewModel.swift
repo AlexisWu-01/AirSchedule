@@ -15,14 +15,13 @@ enum FlightSortOption {
 
 class FlightListViewModel: ObservableObject {
     @Published var flights: [Flight] = []
+    @Published var filteredFlights: [Flight] = []
     @Published var isLoading: Bool = false
-    @Published var errorMessage: String?
+    @Published var sortOption: FlightSortOption = .departureTime
     @Published var departureAirport: String = "SAN"
     @Published var arrivalAirport: String = "SFO"
     @Published var flightDate: Date = Date()
-    @Published var sortOption: FlightSortOption = .departureTime
-    @Published var filteredFlights: [Flight] = []
-
+    
     var selectedDepartureAirport: String {
         departureAirport
     }
@@ -37,7 +36,6 @@ class FlightListViewModel: ObservableObject {
 
     func fetchFlights() {
         isLoading = true
-        errorMessage = nil
 
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -51,11 +49,7 @@ class FlightListViewModel: ObservableObject {
                     self?.flights = flights
                     self?.filterFlights()
                     print("Number of flights fetched: \(flights.count)")
-                    if flights.isEmpty {
-                        self?.errorMessage = "No flights found for the selected route and date."
-                    }
                 case .failure(let error):
-                    self?.errorMessage = "Error fetching flights: \(error.localizedDescription)"
                     print("Error fetching flights: \(error)")
                 }
             }

@@ -13,6 +13,7 @@
 		7B5703C42CBDD521005ACF06 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5703C32CBDD51C005ACF06 /* MapView.swift */; };
 		7B5703C62CBDD6D0005ACF06 /* ClothingAdviceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5703C52CBDD6CB005ACF06 /* ClothingAdviceService.swift */; };
 		7B5703C92CBE504B005ACF06 /* Meeting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5703C82CBE5045005ACF06 /* Meeting.swift */; };
+		7B5703CD2CBFDBE4005ACF06 /* color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5703CC2CBFDBE3005ACF06 /* color.swift */; };
 		7BE10E992CBCD21400E5A3DB /* AirScheduleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BE10E942CBCD21400E5A3DB /* AirScheduleApp.swift */; };
 		7BE10E9B2CBCD21400E5A3DB /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BE10E922CBCD21400E5A3DB /* Preview Assets.xcassets */; };
 		7BE10E9C2CBCD21400E5A3DB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BE10E952CBCD21400E5A3DB /* Assets.xcassets */; };
@@ -46,6 +47,7 @@
 		7B5703C52CBDD6CB005ACF06 /* ClothingAdviceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClothingAdviceService.swift; sourceTree = "<group>"; };
 		7B5703C72CBDEE88005ACF06 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		7B5703C82CBE5045005ACF06 /* Meeting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meeting.swift; sourceTree = "<group>"; };
+		7B5703CC2CBFDBE3005ACF06 /* color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = color.swift; sourceTree = "<group>"; };
 		7BE10E642CBCCCFF00E5A3DB /* AirSchedule.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AirSchedule.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7BE10E922CBCD21400E5A3DB /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		7BE10E942CBCD21400E5A3DB /* AirScheduleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirScheduleApp.swift; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 		7BE10EA42CBCD74C00E5A3DB /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				7B5703CC2CBFDBE3005ACF06 /* color.swift */,
 				7B5703C82CBE5045005ACF06 /* Meeting.swift */,
 				7B5703C32CBDD51C005ACF06 /* MapView.swift */,
 				7BE10EB32CBCECFC00E5A3DB /* SearchBar.swift */,
@@ -256,6 +259,7 @@
 				7BE10ED82CBDA11100E5A3DB /* ResponseGenerationService.swift in Sources */,
 				7BE10ED42CBDA0D800E5A3DB /* IntentRecognitionService.swift in Sources */,
 				7BE10EA02CBCD23600E5A3DB /* Flight.swift in Sources */,
+				7B5703CD2CBFDBE4005ACF06 /* color.swift in Sources */,
 				7B5703C92CBE504B005ACF06 /* Meeting.swift in Sources */,
 				7BE10EB02CBCDAA100E5A3DB /* FlightDetailView.swift in Sources */,
 				7BE10EB62CBD0B5500E5A3DB /* CalendarService.swift in Sources */,

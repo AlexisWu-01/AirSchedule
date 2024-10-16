@@ -11,116 +11,122 @@ struct FlightDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // Flight Header
                 flightHeader
-
-                // Flight Details
                 flightDetails
-
-                // Dynamic UI Components
                 DynamicUIRenderer(uiComponents: viewModel.uiComponents)
-                    .onAppear {
-                        print("Debug: DynamicUIRenderer in FlightDetailView with \(viewModel.uiComponents.count) components")
-                        for (index, component) in viewModel.uiComponents.enumerated() {
-                            print("Debug: Component \(index) - Type: \(component.type), Properties: \(component.properties)")
-                        }
-                    }
-
-                // User Query Input
                 userQueryInput
             }
             .padding()
         }
         .navigationBarTitle("Flight Details", displayMode: .inline)
-        .onAppear {
-            print("Debug: FlightDetailView appeared")
-        }
+        .background(Color.airLightBlue)
     }
 
     private var flightHeader: some View {
-        HStack {
-            AsyncImage(url: URL(string: viewModel.flight.airlineLogo)) { image in
-                image.resizable().aspectRatio(contentMode: .fit)
-            } placeholder: {
-                ProgressView()
+        VStack(spacing: 16) {
+            HStack {
+                AsyncImage(url: URL(string: viewModel.flight.airlineLogo)) { image in
+                    image.resizable().aspectRatio(contentMode: .fit)
+                } placeholder: {
+                    ProgressView()
+                }
+                .frame(width: 60, height: 60)
+                .cornerRadius(30)
+
+                VStack(alignment: .leading) {
+                    Text(viewModel.flight.airline)
+                        .font(.headline)
+                    Text(viewModel.flight.flightNumber)
+                        .font(.subheadline)
+                        .foregroundColor(.airDarkGray)
+                }
+
+                Spacer()
+
+                Text("$\(String(format: "%.2f", viewModel.flight.price))")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.airBlue)
             }
-            .frame(width: 50, height: 50)
 
-            VStack(alignment: .leading) {
-                Text(viewModel.flight.airline)
-                    .font(.headline)
-                Text(viewModel.flight.flightNumber)
-                    .font(.subheadline)
+            Divider()
+
+            HStack {
+                VStack(alignment: .leading) {
+                    Text(viewModel.flight.departureAirport)
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                    Text(formatDate(viewModel.flight.departureTime))
+                        .font(.subheadline)
+                        .foregroundColor(.airDarkGray)
+                }
+
+                Spacer()
+
+                Image(systemName: "airplane")
+                    .foregroundColor(.airBlue)
+                    .font(.system(size: 24))
+
+                Spacer()
+
+                VStack(alignment: .trailing) {
+                    Text(viewModel.flight.arrivalAirport)
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                    Text(formatDate(viewModel.flight.arrivalTime))
+                        .font(.subheadline)
+                        .foregroundColor(.airDarkGray)
+                }
             }
-
-            Spacer()
-
-            Text("$\(String(format: "%.2f", viewModel.flight.price))")
-                .font(.title2)
-                .fontWeight(.bold)
         }
         .padding()
-        .background(Color.blue.opacity(0.1))
-        .cornerRadius(10)
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 
     private var flightDetails: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            flightTimeRow
-            flightDurationRow
-            flightClassRow
+        VStack(alignment: .leading, spacing: 16) {
+            detailRow(icon: "clock", title: "Duration", value: formatDuration(TimeInterval(viewModel.flight.duration * 60)))
+            detailRow(icon: "seat.fill", title: "Class", value: viewModel.flight.travelClass)
+            detailRow(icon: "ruler", title: "Legroom", value: "\(viewModel.flight.legroom) inches")
         }
         .padding()
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(10)
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 
-    private var flightTimeRow: some View {
+    private func detailRow(icon: String, title: String, value: String) -> some View {
         HStack {
-            VStack(alignment: .leading) {
-                Text(viewModel.flight.departureAirport)
-                    .font(.headline)
-                Text(formatDate(viewModel.flight.departureTime))
-                    .font(.subheadline)
-            }
-
+            Image(systemName: icon)
+                .foregroundColor(.airBlue)
+                .frame(width: 30)
+            Text(title)
+                .foregroundColor(.airDarkGray)
             Spacer()
-
-            Image(systemName: "airplane")
-                .foregroundColor(.blue)
-
-            Spacer()
-
-            VStack(alignment: .trailing) {
-                Text(viewModel.flight.arrivalAirport)
-                    .font(.headline)
-                Text(formatDate(viewModel.flight.arrivalTime))
-                    .font(.subheadline)
-            }
-        }
-    }
-
-    private var flightDurationRow: some View {
-        HStack {
-            Image(systemName: "clock")
-            Text("Duration: \(formatDuration(TimeInterval(viewModel.flight.duration * 60)))")
-        }
-    }
-
-    private var flightClassRow: some View {
-        HStack {
-            Image(systemName: "seat.fill")
-            Text("Class: \(viewModel.flight.travelClass)")
+            Text(value)
+                .fontWeight(.medium)
         }
     }
 
     private var userQueryInput: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Ask a question about your flight:")
+            Text("Ask about your flight:")
                 .font(.headline)
-            TextField("Enter your query here", text: $userQuery, onCommit: submitQuery)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .disabled(isLoading)
+            HStack {
+                TextField("Enter your query here", text: $userQuery)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .disabled(isLoading)
+                Button(action: submitQuery) {
+                    Image(systemName: "paperplane.fill")
+                        .foregroundColor(.white)
+                        .padding(8)
+                        .background(Color.airBlue)
+                        .cornerRadius(8)
+                }
+                .disabled(isLoading || userQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
 
             if isLoading {
                 ProgressView()
@@ -129,8 +135,13 @@ struct FlightDetailView: View {
             if let errorMessage = errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
+                    .font(.footnote)
             }
         }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 
     private func submitQuery() {
@@ -156,18 +167,7 @@ struct FlightDetailView: View {
 
     private func formatDuration(_ duration: TimeInterval) -> String {
         let hours = Int(duration / 3600)
-        let minutes = Int((duration.truncatingRemainder(dividingBy: 3600))/60)
+        let minutes = Int((duration.truncatingRemainder(dividingBy: 3600)) / 60)
         return "\(hours)h \(minutes)m"
-    }
-}
-
-struct PrimaryButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .foregroundColor(.white)
-            .padding()
-            .background(Color.blue)
-            .cornerRadius(8)
-            .opacity(configuration.isPressed ? 0.7 : 1.0)
     }
 }

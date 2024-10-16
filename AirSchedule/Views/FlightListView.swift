@@ -12,78 +12,129 @@ struct FlightListView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
-                Form {
-                    Section(header: Text("Search Flights")) {
-                        TextField("Departure Airport", text: $viewModel.departureAirport)
-                        TextField("Arrival Airport", text: $viewModel.arrivalAirport)
-                        DatePicker("Flight Date", selection: $viewModel.flightDate, displayedComponents: .date)
-                    }
-                    
-                    Button(action: {
-                        viewModel.fetchFlights()
-                    }) {
-                        Text("Search Flights")
-                    }
-                }
-
+            VStack(spacing: 0) {
+                flightSearchForm
+                
                 Picker("Sort by", selection: $viewModel.sortOption) {
-                    Text("Departure Time").tag(FlightSortOption.departureTime)
-                    Text("Arrival Time").tag(FlightSortOption.arrivalTime)
+                    Text("Departure").tag(FlightSortOption.departureTime)
+                    Text("Arrival").tag(FlightSortOption.arrivalTime)
                     Text("Price").tag(FlightSortOption.price)
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding()
+                .background(Color.airLightBlue)
                 .onChange(of: viewModel.sortOption) { _ in
                     viewModel.sortFlights()
                 }
 
-                if viewModel.filteredFlights.isEmpty && !viewModel.isLoading {
-                    Text("No flights found")
-                        .foregroundColor(.gray)
-                        .padding()
-                } else {
-                    List(viewModel.filteredFlights) { flight in
-                        NavigationLink(destination: FlightDetailView(viewModel: FlightDetailViewModel(flight: flight))) {
-                            FlightRowView(flight: flight)
-                        }
-                    }
-                    .listStyle(PlainListStyle())
-                }
-
                 if viewModel.isLoading {
                     ProgressView("Loading flights...")
-                }
-
-                if let errorMessage = viewModel.errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .padding()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.airLightBlue)
+                } else if viewModel.filteredFlights.isEmpty {
+                    emptyStateView
+                } else {
+                    flightList
                 }
             }
+            .background(Color.airLightBlue)
             .navigationTitle("Flights")
         }
+        .accentColor(.airBlue)
+    }
+
+    private var flightSearchForm: some View {
+        Form {
+            Section(header: Text("Flight Search")) {
+                TextField("Departure Airport", text: $viewModel.departureAirport)
+                TextField("Arrival Airport", text: $viewModel.arrivalAirport)
+                DatePicker("Flight Date", selection: $viewModel.flightDate, displayedComponents: .date)
+            }
+            
+            Button(action: {
+                viewModel.fetchFlights()
+            }) {
+                Text("Search Flights")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(PrimaryButtonStyle())
+        }
+        .padding(.bottom)
+    }
+
+    private var emptyStateView: some View {
+        VStack {
+            Image(systemName: "airplane")
+                .font(.system(size: 60))
+                .foregroundColor(.airBlue)
+            Text("No flights found")
+                .font(.headline)
+            Text("Try adjusting your search criteria")
+                .font(.subheadline)
+                .foregroundColor(.airDarkGray)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.airLightBlue)
+    }
+
+    private var flightList: some View {
+        List {
+            ForEach(viewModel.filteredFlights) { flight in
+                NavigationLink(destination: FlightDetailView(viewModel: FlightDetailViewModel(flight: flight))) {
+                    FlightRowView(flight: flight)
+                }
+            }
+        }
+        .listStyle(PlainListStyle())
     }
 }
 
 struct FlightRowView: View {
     let flight: Flight
-
+    
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("\(flight.airlineCode) Flight \(flight.flightNumber)")
-                .font(.headline)
-            Text("\(flight.departureAirport) → \(flight.arrivalAirport)")
-            Text("Departure: \(formattedDate(flight.departureTime))")
-            Text("Arrival: \(formattedDate(flight.arrivalTime))")
-            Text("Price: $\(String(format: "%.2f", flight.price))")
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("\(flight.airlineCode) \(flight.flightNumber)")
+                    .font(.headline)
+                    .foregroundColor(.airBlue)
+                Text("\(formattedTime(flight.departureTime)) → \(formattedTime(flight.arrivalTime))")
+                    .font(.subheadline)
+                    .foregroundColor(.airDarkGray)
+            }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 4) {
+                Text("$\(String(format: "%.2f", flight.price))")
+                    .font(.headline)
+                    .foregroundColor(.airBlue)
+                Text(formattedDuration(flight.duration))
+                    .font(.subheadline)
+                    .foregroundColor(.airDarkGray)
+            }
         }
+        .padding(.vertical, 8)
     }
 
-    func formattedDate(_ date: Date) -> String {
+    private func formattedTime(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .short
+        formatter.dateFormat = "HH:mm"
         return formatter.string(from: date)
+    }
+
+    private func formattedDuration(_ minutes: Int) -> String {
+        let hours = minutes / 60
+        let mins = minutes % 60
+        return "\(hours)h \(mins)m"
+    }
+}
+
+struct PrimaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding()
+            .background(Color.airBlue)
+            .foregroundColor(.white)
+            .cornerRadius(8)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1)
     }
 }
