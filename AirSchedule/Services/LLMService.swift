@@ -505,12 +505,13 @@ class LLMService {
         let body: [String: Any] = [
             "model": "gpt-3.5-turbo",
             "messages": messages,
-            "max_tokens": 10,
+            "max_tokens": 100,
             "temperature": 0
         ]
         
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
+            print("Request body: \(String(describing: request.httpBody))")
         } catch {
             completion(.failure(error))
             return
