@@ -93,11 +93,11 @@ AirSchedule employs a modular and scalable architecture, ensuring flexibility, h
 - **Services**
   - **LLMService**: Interfaces with the OpenAI API to parse user queries and generate actionable plans.
   - **ActionExecutor**: Executes the steps outlined in the action plans by interacting with various backend services.
-  - **FlightService**: Retrieves flight details, statuses, and calculates travel times.
-  - **CalendarService**: Manages user schedules and retrieves meeting details.
-  - **MapsService**: Calculates travel time and provides navigation data.
-  - **WeatherService**: Fetches current and forecasted weather information for specified locations.
-  - **ClothingAdviceService**: Provides clothing recommendations based on weather conditions and event types.
+  - **FlightService**: Retrieves flight details, statuses, and calculates travel times. Using real-time google flights api through serp api.
+  - **CalendarService**: Manages user schedules and retrieves meeting details. Using apple Calendar EventKit.
+  - **MapsService**: Calculates travel time and provides navigation data. Using apple MapKit.
+  - **WeatherService**: Fetches current and forecasted weather information for specified locations. Using mock api.
+  - **ClothingAdviceService**: Provides clothing recommendations based on weather conditions and event types. Using mock api.
   - **ResponseGenerationService**: Formats responses and UI components based on aggregated data.
 
 - **Models**
