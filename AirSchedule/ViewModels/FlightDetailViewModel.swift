@@ -22,7 +22,7 @@ class FlightDetailViewModel: ObservableObject {
         DispatchQueue.main.async {
             print("Debug: Updating UI with \(self.uiComponents.count) components")
             for (index, component) in self.uiComponents.enumerated() {
-                print("Debug: Component \(index) - Type: \(component.type)")
+                print("Debug: Component \(index) - Type: \(type(of: component)), Content: \(component)")
             }
             self.objectWillChange.send()
         }
@@ -60,13 +60,20 @@ class FlightDetailViewModel: ObservableObject {
                 for (key, value) in updatedContext {
                     self.context[key] = AnyCodable(value)
                 }
-                print("Debug: Updated context in FlightDetailViewModel: \(self.context)")
+                print("Debug: Final updated context in FlightDetailViewModel: \(self.context)")
                 
                 // Update UI components using the updateUIComponents closure
                 var updatedUIComponents = actionPlan.uiComponents
-                actionPlan.updateUIComponents?(&updatedUIComponents, self.context)
-                self.uiComponents = updatedUIComponents
+                for i in 0..<updatedUIComponents.count {
+                    if updatedUIComponents[i].type == "weather",
+                       let weatherData = self.context["weatherData"]?.value as? [String: AnyCodable] {
+                        updatedUIComponents[i].properties["weatherData"] = AnyCodable(weatherData)
+                    }
+                }
                 
+                print("Debug: Updated UI components: \(updatedUIComponents)")
+                
+                self.uiComponents = updatedUIComponents
                 self.updateUI()
                 completion(success, error)
             }

@@ -27,18 +27,16 @@ struct DynamicUIRenderer: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                
                 ForEach(uiComponents) { component in
                     renderComponent(component)
                 }
-                
                 Spacer()
             }
             .padding()
             .onAppear {
                 print("Debug: DynamicUIRenderer appeared with \(uiComponents.count) components")
                 for (index, component) in uiComponents.enumerated() {
-                    print("Debug: Component \(index) - Type: \(component.type)")
+                    print("Debug: Component \(index) - Type: \(component.type), Properties: \(component.properties)")
                 }
             }
         }
@@ -48,44 +46,29 @@ struct DynamicUIRenderer: View {
     private func renderComponent(_ component: UIComponent) -> some View {
         switch component.type {
         case "meetingAvailability":
-            MeetingAvailabilityView(meetingData: component.properties)
+            ImprovedMeetingAvailabilityView(meetingData: component.properties)
         case "map":
             if let mapData = component.properties["mapData"]?.value as? [String: AnyCodable],
                let fromLocation = mapData["fromLocation"]?.value as? CLLocationCoordinate2D,
                let toLocation = mapData["toLocation"]?.value as? CLLocationCoordinate2D {
                 MapLocationView(fromCoordinate: fromLocation, toCoordinate: toLocation)
-                    .onAppear {
-                        print("Debug: Rendering map component from \(fromLocation) to \(toLocation)")
-                    }
             } else {
-                Text("Invalid map data")
-                    .onAppear {
-                        print("Debug: Invalid map data in component: \(component.properties)")
-                    }
+                ImprovedTextView(content: "Invalid map data")
             }
         case "text":
             if let content = component.properties["content"]?.value as? String {
-                Text(content)
-                    .onAppear {
-                        print("Debug: Rendering text component: \(content)")
-                    }
+                ImprovedTextView(content: content)
             } else {
-                Text("Invalid text data")
-                    .onAppear {
-                        print("Debug: Invalid text data in component: \(component.properties)")
-                    }
+                ImprovedTextView(content: "Invalid text data")
             }
         case "weather":
             if let weatherData = component.properties["weatherData"]?.value as? [String: AnyCodable] {
-                WeatherView(weatherData: weatherData)
+                ImprovedWeatherView(weatherData: weatherData)
             } else {
-                Text("Invalid weather data")
+                ImprovedTextView(content: "Invalid weather data")
             }
         default:
-            Text("Unsupported component type: \(component.type)")
-                .onAppear {
-                    print("Debug: Unsupported component type: \(component.type)")
-                }
+            ImprovedTextView(content: "Unsupported component type: \(component.type)")
         }
     }
     
@@ -241,5 +224,120 @@ struct MapLocationView: View {
     }
 }
 
+struct ImprovedTextView: View {
+    let content: String
+    
+    var body: some View {
+        Text(content)
+            .font(.body)
+            .foregroundColor(.primary)
+            .padding()
+            .background(Color.airLightBlue)
+            .cornerRadius(10)
+            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+    }
+}
 
+struct ImprovedMeetingAvailabilityView: View {
+    let meetingData: [String: AnyCodable]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(meetingData["title"]?.value as? String ?? "Unknown Event")
+                .font(.headline)
+                .foregroundColor(.airBlue)
+            
+            HStack {
+                Image(systemName: "clock")
+                    .foregroundColor(.airDarkGray)
+                Text(formattedTime(meetingData["startTime"]?.value as? String))
+                    .font(.subheadline)
+            }
+            
+            HStack {
+                Image(systemName: "mappin.and.ellipse")
+                    .foregroundColor(.airDarkGray)
+                Text(meetingData["location"]?.value as? String ?? "Unknown Location")
+                    .font(.subheadline)
+            }
+            
+            if let canMakeIt = meetingData["canMakeIt"]?.value as? Bool {
+                HStack {
+                    Image(systemName: canMakeIt ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .foregroundColor(canMakeIt ? .green : .red)
+                    Text(canMakeIt ? "You can make it to the meeting" : "You might not make it to the meeting")
+                        .font(.subheadline)
+                        .foregroundColor(canMakeIt ? .green : .red)
+                }
+            }
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(15)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+    }
+    
+    private func formattedTime(_ isoString: String?) -> String {
+        guard let isoString = isoString,
+              let date = ISO8601DateFormatter().date(from: isoString) else {
+            return "Unknown Time"
+        }
+        return DateFormatter.shortDateTime.string(from: date)
+    }
+}
 
+struct ImprovedWeatherView: View {
+    let weatherData: [String: AnyCodable]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Weather at Arrival")
+                .font(.headline)
+            
+            HStack {
+                Image(systemName: weatherIcon)
+                    .font(.system(size: 40))
+                    .foregroundColor(.airBlue)
+                
+                VStack(alignment: .leading) {
+                    Text(weatherData["weather"]?.value as? String ?? "Unknown")
+                        .font(.title2)
+                    if let temperature = weatherData["temperature"]?.value as? Int {
+                        Text("\(temperature)°F")
+                            .font(.title3)
+                            .foregroundColor(.airBlue)
+                    }
+                    Text(weatherData["location"]?.value as? String ?? "Unknown Location")
+                        .font(.subheadline)
+                    Text(formattedTime(weatherData["time"]?.value as? String ?? ""))
+                        .font(.subheadline)
+                        .foregroundColor(.airDarkGray)
+                }
+            }
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(15)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+    }
+    
+    private var weatherIcon: String {
+        switch weatherData["weather"]?.value as? String {
+        case "Sunny": return "sun.max.fill"
+        case "Cloudy": return "cloud.fill"
+        case "Rainy": return "cloud.rain.fill"
+        case "Windy": return "wind"
+        default: return "questionmark.circle.fill"
+        }
+    }
+    
+    private func formattedTime(_ time: String) -> String {
+        let inputFormatter = ISO8601DateFormatter()
+        inputFormatter.formatOptions = [.withInternetDateTime]
+        
+        if let date = inputFormatter.date(from: time) {
+            return DateFormatter.shortDateTime.string(from: date)
+        }
+        return time
+    }
+}

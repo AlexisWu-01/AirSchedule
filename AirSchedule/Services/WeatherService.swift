@@ -17,10 +17,12 @@ class WeatherService {
         DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
             let weatherConditions = ["Sunny", "Cloudy", "Rainy", "Windy"]
             let randomWeather = weatherConditions.randomElement() ?? "Unknown"
+            let randomTemperature = Int.random(in: 50...90)
             let result: [String: AnyCodable] = [
                 "weather": AnyCodable(randomWeather),
                 "location": AnyCodable(location ?? ""),
-                "time": AnyCodable(time ?? "")
+                "time": AnyCodable(time ?? ""),
+                "temperature": AnyCodable(randomTemperature)
             ]
             completion(.success(result))
         }

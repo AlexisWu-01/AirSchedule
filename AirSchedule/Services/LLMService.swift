@@ -81,7 +81,7 @@ class LLMService {
             **Available APIs:**
             - **flight_data**: Provides detailed flight information.
             - **calendar**: Manages user schedules and events.
-            - **weather**: Offers current and forecasted weather information for the arrival airport through api.
+            - **weather**: fetches current and forecasted weather information for the arrival airport through api.
             - **maps**: Supplies navigation and location-based data.
             - **clothing_advice**: Suggests appropriate attire based on weather and event type.
 
@@ -92,6 +92,7 @@ class LLMService {
             - **map**: Displays map views.
             - **image**: Shows images or logos.
             - **meetingAvailability**: Displays meeting availability information with flight details.
+            - **weather**: Displays weather information with icon, temperature, and conditions.
 
             **Objective:**
             Interpret the user's query and generate an action plan in JSON format containing:
@@ -318,34 +319,40 @@ class LLMService {
             ```
             ---
 
-            **Example 4: Simplified Flight Carbon Emissions Inquiry**
+            **Example 4: Weather Inquiry**
 
-            **User Query**: "What are the carbon emissions for flight AS3478?"
+            **User Query**: "What is the weather like when I land"
 
             **Expected Action Plan**:
             ```json
             {
-            "intent": "get_carbon_emissions",
+            "intent": "get_weather",
             "entities": {
-                "flightNumber": "AS3478"
+                "location": "arrivalAirport",
+                "time": "arrivalTime"
             },
             "actions": [
                 {
-                "api": "flight_data",
-                "method": "getCarbonEmissions",
+                "api": "weather",
+                "method": "getForecast",
                 "parameters": {
-                    "flightNumber": "AS3478"
+                    "location": "arrivalAirport",
+                    "time": "arrivalTime"
                 }
                 }
             ],
             "ui_components": [
                 {
-                "type": "text",
+                "type": "weather",
                 "properties": {
-                    "content": "Flight AS3478 emits 120.5 kg of CO₂."
+                    "weatherData": {
+                        "location": "arrivalAirport",
+                        "time": "arrivalTime",
+                        "weather": "sunny",
+                        "temperature": 75
+                    }
                 }
                 }
-  
             ]
             }
             ```
