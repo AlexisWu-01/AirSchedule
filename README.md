@@ -12,6 +12,8 @@ AirSchedule is a comprehensive travel information application designed to help u
     - [Steps](#steps)
   - [Usage](#usage)
   - [Architecture Overview](#architecture-overview)
+    - [System Diagram](#system-diagram)
+    - [Workflow Diagram](#workflow-diagram)
     - [Key Components](#key-components)
       - [Frontend](#frontend)
       - [Backend Orchestration](#backend-orchestration)
@@ -81,6 +83,14 @@ AirSchedule is a comprehensive travel information application designed to help u
 ## Architecture Overview
 
 AirSchedule employs a modular and scalable architecture, ensuring flexibility, high performance, and ease of maintenance. The system is divided into frontend and backend orchestration layers, with each layer handling specific responsibilities. Additionally, distinct layers for models and error handling ensure organized data management and robust user feedback mechanisms.
+
+### System Diagram
+
+![System Diagram](https://github.com/AlexisWu-01/AirSchedule/raw/main/demo/system_diagram.svg)
+
+### Workflow Diagram
+
+![Workflow Diagram](https://github.com/AlexisWu-01/AirSchedule/raw/main/demo/workflow_diagram.svg)
 
 ### Key Components
 
