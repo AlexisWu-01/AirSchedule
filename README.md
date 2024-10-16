@@ -91,7 +91,7 @@ AirSchedule employs a modular and scalable architecture, ensuring flexibility, h
 #### **Backend Orchestration**
 
 - **Services**
-  - **LLMService**: Interfaces with the OpenAI API to parse user queries and generate actionable plans.
+  - **LLMService**: Interfaces with the OpenAI API to parse user queries and generate actionable plans as well as uiComponents.
   - **ActionExecutor**: Executes the steps outlined in the action plans by interacting with various backend services.
   - **FlightService**: Retrieves flight details, statuses, and calculates travel times. Using real-time google flights api through serp api.
   - **CalendarService**: Manages user schedules and retrieves meeting details. Using apple Calendar EventKit.
