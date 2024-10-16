@@ -8,7 +8,9 @@
 import SwiftUI
 import MapKit
 
-// Move the DateFormatter extension to the file scope
+
+
+// MARK: - DateFormatter Extension
 extension DateFormatter {
     static let shortDateTime: DateFormatter = {
         let formatter = DateFormatter()
@@ -18,74 +20,73 @@ extension DateFormatter {
     }()
 }
 
+// MARK: - DynamicUIRenderer View
 struct DynamicUIRenderer: View {
     let uiComponents: [UIComponent]
     
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Debug: DynamicUIRenderer with \(uiComponents.count) components")
-                .foregroundColor(.red)
-            
-            ForEach(uiComponents.indices, id: \.self) { index in
-                renderComponent(uiComponents[index], index: index)
+        ScrollView {
+            VStack(spacing: 20) {
+                Text("Debug: DynamicUIRenderer with \(uiComponents.count) components")
+                    .foregroundColor(.red)
+                    .padding(.top)
+                
+                ForEach(uiComponents) { component in
+                    renderComponent(component)
+                }
+                
+                Spacer()
             }
-        }
-        .padding()
-        .onAppear {
-            print("Debug: DynamicUIRenderer appeared with \(uiComponents.count) components")
-            for (index, component) in uiComponents.enumerated() {
-                print("Debug: Component \(index) - Type: \(component.type)")
+            .padding()
+            .onAppear {
+                print("Debug: DynamicUIRenderer appeared with \(uiComponents.count) components")
+                for (index, component) in uiComponents.enumerated() {
+                    print("Debug: Component \(index) - Type: \(component.type)")
+                }
             }
         }
     }
     
     @ViewBuilder
-    private func renderComponent(_ component: UIComponent, index: Int) -> some View {
+    private func renderComponent(_ component: UIComponent) -> some View {
         switch component.type {
+        case "meetingAvailability":
+            MeetingAvailabilityView(meetingData: component.properties)
+        case "map":
+            if let mapData = component.properties["mapData"]?.value as? [String: AnyCodable],
+               let fromLocation = mapData["fromLocation"]?.value as? CLLocationCoordinate2D,
+               let toLocation = mapData["toLocation"]?.value as? CLLocationCoordinate2D {
+                MapLocationView(fromCoordinate: fromLocation, toCoordinate: toLocation)
+                    .onAppear {
+                        print("Debug: Rendering map component from \(fromLocation) to \(toLocation)")
+                    }
+            } else {
+                Text("Invalid map data")
+                    .onAppear {
+                        print("Debug: Invalid map data in component: \(component.properties)")
+                    }
+            }
         case "text":
             if let content = component.properties["content"]?.value as? String {
                 Text(content)
-                    .onAppear { print("Debug: Rendering text component \(index): \(content)") }
+                    .onAppear {
+                        print("Debug: Rendering text component: \(content)")
+                    }
             } else {
-                Text("Invalid text component")
-                    .foregroundColor(.red)
-                    .onAppear { print("Debug: Invalid text component \(index)") }
-            }
-        case "map":
-            if let from = component.properties["from"]?.value as? String,
-               let to = component.properties["to"]?.value as? String {
-                Text("Map from \(from) to \(to)")
-                    .onAppear { print("Debug: Rendering map component \(index)") }
-            } else {
-                Text("Invalid map component")
-                    .foregroundColor(.red)
-                    .onAppear { print("Debug: Invalid map component: Missing or invalid coordinates.") }
-            }
-        case "error":
-            if let errorText = component.properties["text"]?.value as? String {
-                Text(errorText)
-                    .foregroundColor(.red)
-                    .onAppear { print("Debug: Rendering error component \(index): \(errorText)") }
-            }
-        case "meetingAvailability":
-            if let meetingData = component.properties as? [String: AnyCodable] {
-                MeetingAvailabilityView(meetingData: meetingData)
-                    .onAppear { print("Debug: Rendering meeting availability component with data: \(meetingData)") }
-            } else {
-                Text("No meeting data available")
-                    .foregroundColor(.gray)
-                    .onAppear { print("Debug: No meeting data available. Raw data: \(component.properties)") }
+                Text("Invalid text data")
+                    .onAppear {
+                        print("Debug: Invalid text data in component: \(component.properties)")
+                    }
             }
         default:
-            Text("Unknown component type: \(component.type)")
-                .foregroundColor(.orange)
-                .onAppear { print("Debug: Unknown component type \(index): \(component.type)") }
+            Text("Unsupported component type: \(component.type)")
+                .onAppear {
+                    print("Debug: Unsupported component type: \(component.type)")
+                }
         }
     }
     
-    
-    // Example UI Components
-    
+    // MARK: - Example UI Components (Optional)
     struct LegroomStatusView: View {
         let legroom: String
         
@@ -129,9 +130,7 @@ struct DynamicUIRenderer: View {
         }
     }
     
-    
-    
-    // Weather View
+    // MARK: - Weather View
     struct WeatherView: View {
         let weatherDescription: String
         
@@ -148,3 +147,76 @@ struct DynamicUIRenderer: View {
         }
     }
 }
+
+// MARK: - MapLocationView with MapOverlay Integration
+struct MapLocationView: View {
+    let fromCoordinate: CLLocationCoordinate2D
+    let toCoordinate: CLLocationCoordinate2D
+    @State private var route: MKRoute?
+    @State private var isLoading = true
+    @State private var errorMessage: String?
+    @State private var travelTime: TimeInterval?
+
+    var body: some View {
+        ZStack {
+            if let route = route {
+                CustomMapView(route: route, sourceCoordinate: fromCoordinate, destinationCoordinate: toCoordinate)
+            } else {
+                Map(coordinateRegion: .constant(MKCoordinateRegion(
+                    center: CLLocationCoordinate2D(
+                        latitude: (fromCoordinate.latitude + toCoordinate.latitude) / 2,
+                        longitude: (fromCoordinate.longitude + toCoordinate.longitude) / 2
+                    ),
+                    span: MKCoordinateSpan(
+                        latitudeDelta: abs(fromCoordinate.latitude - toCoordinate.latitude) * 1.5,
+                        longitudeDelta: abs(fromCoordinate.longitude - toCoordinate.longitude) * 1.5
+                    )
+                )), annotationItems: [
+                    MapAnnotation(coordinate: fromCoordinate, title: "Start"),
+                    MapAnnotation(coordinate: toCoordinate, title: "End")
+                ]) { annotation in
+                    MapMarker(coordinate: annotation.coordinate, tint: annotation.title == "Start" ? .green : .red)
+                }
+            }
+            if isLoading {
+                ProgressView()
+            }
+            if let errorMessage = errorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+            }
+        }
+        .frame(height: 300)
+        .cornerRadius(10)
+        .onAppear(perform: loadRoute)
+    }
+
+    private func loadRoute() {
+        print("Debug: Starting loadRoute")
+        let request = MKDirections.Request()
+        request.source = MKMapItem(placemark: MKPlacemark(coordinate: fromCoordinate))
+        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: toCoordinate))
+        request.transportType = .automobile
+
+        let directions = MKDirections(request: request)
+        directions.calculate { response, error in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                if let error = error {
+                    self.errorMessage = error.localizedDescription
+                    print("Debug: Error loading route - \(error.localizedDescription)")
+                } else if let route = response?.routes.first {
+                    print("Debug: Successfully loaded route")
+                    self.route = route
+                    self.travelTime = route.expectedTravelTime
+                } else {
+                    self.errorMessage = "No route found"
+                    print("Debug: No route found")
+                }
+            }
+        }
+    }
+}
+
+
+

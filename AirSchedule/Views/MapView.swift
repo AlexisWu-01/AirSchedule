@@ -2,126 +2,108 @@
 //  MapView.swift
 //  AirSchedule
 //
-//  Created by Xinyi WU on 10/14/24.
+//  Created by Xinyi Wu on 2024-10-14.
 //
 
 import SwiftUI
 import MapKit
 
-struct PolylineOverlay: Shape {
+struct CustomMapView: View {
     let route: MKRoute
+    let sourceCoordinate: CLLocationCoordinate2D
+    let destinationCoordinate: CLLocationCoordinate2D
     
-    func path(in rect: CGRect) -> Path {
-        let polyline = route.polyline
-        let path = Path { path in
-            for index in 0..<polyline.pointCount {
-                let polyPoint = polyline.points()[index]
-                let coord = polyPoint.coordinate
-                let mapPoint = MKMapPoint(coord)
-                let mapRect = polyline.boundingMapRect
-                let x = CGFloat((mapPoint.x - mapRect.origin.x) / mapRect.size.width) * rect.width
-                let y = CGFloat((mapPoint.y - mapRect.origin.y) / mapRect.size.height) * rect.height
-                let point = CGPoint(x: x, y: y)
-                
-                if index == 0 {
-                    path.move(to: point)
-                } else {
-                    path.addLine(to: point)
-                }
-            }
-        }
-        return path
-    }
-}
-
-struct MapView: View {
     @State private var region: MKCoordinateRegion
-    @State private var route: MKRoute?
-    @State private var travelTime: TimeInterval?
-    @State private var annotations: [CustomAnnotation] = []
-    @State private var showingError: Bool = false
-    @State private var errorMessage: String = ""
+    @State private var annotations: [MapAnnotation]
     
-    let fromCoordinate: CLLocationCoordinate2D
-    let toCoordinate: CLLocationCoordinate2D
-    
-    init(fromCoordinate: CLLocationCoordinate2D, toCoordinate: CLLocationCoordinate2D) {
-            self.fromCoordinate = fromCoordinate
-            self.toCoordinate = toCoordinate
-            _region = State(initialValue: MKCoordinateRegion(
-                center: fromCoordinate,
-                span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
-            ))
-        }
-
-        var body: some View {
-            Map(coordinateRegion: $region)
-                .frame(height: 300)
-                .cornerRadius(10)
-                .onAppear {
-                    print("MapView appeared with from: \(fromCoordinate) to: \(toCoordinate)")
-                }
-        }
-    
-    private func calculateRoute() {
-        let request = MKDirections.Request()
-        request.source = MKMapItem(placemark: MKPlacemark(coordinate: fromCoordinate))
-        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: toCoordinate))
-        request.transportType = .automobile
+    init(route: MKRoute, sourceCoordinate: CLLocationCoordinate2D, destinationCoordinate: CLLocationCoordinate2D) {
+        self.route = route
+        self.sourceCoordinate = sourceCoordinate
+        self.destinationCoordinate = destinationCoordinate
         
-        let directions = MKDirections(request: request)
-        directions.calculate { response, error in
-            if let error = error {
-                self.routeCalculationFailed(error: error)
-                return
-            }
-            guard let route = response?.routes.first else {
-                self.routeCalculationFailed(message: "No routes available.")
-                return
-            }
-            
-            DispatchQueue.main.async {
-                self.route = route
-                self.travelTime = route.expectedTravelTime
-                self.region = MKCoordinateRegion(route.polyline.boundingMapRect)
-                self.annotations = [
-                    CustomAnnotation(coordinate: self.fromCoordinate, color: .red),
-                    CustomAnnotation(coordinate: self.toCoordinate, color: .green)
-                ]
-            }
-            DispatchQueue.main.async {
-                self.route = route
-                self.travelTime = route.expectedTravelTime
-                self.annotations = [
-                    CustomAnnotation(coordinate: fromCoordinate, color: .red),
-                    CustomAnnotation(coordinate: toCoordinate, color: .green)
-                ]
-                print("Debug: State updated with route and annotations.")
-            }
-
-        }
+        let center = CLLocationCoordinate2D(
+            latitude: (sourceCoordinate.latitude + destinationCoordinate.latitude) / 2,
+            longitude: (sourceCoordinate.longitude + destinationCoordinate.longitude) / 2
+        )
+        let span = MKCoordinateSpan(
+            latitudeDelta: abs(sourceCoordinate.latitude - destinationCoordinate.latitude) * 1.5,
+            longitudeDelta: abs(sourceCoordinate.longitude - destinationCoordinate.longitude) * 1.5
+        )
+        _region = State(initialValue: MKCoordinateRegion(center: center, span: span))
+        
+        _annotations = State(initialValue: [
+            MapAnnotation(coordinate: sourceCoordinate, title: "Start"),
+            MapAnnotation(coordinate: destinationCoordinate, title: "End")
+        ])
     }
     
-    private func routeCalculationFailed(error: Error? = nil, message: String? = nil) {
-        DispatchQueue.main.async {
-            let errorMessage = error?.localizedDescription ?? message ?? "Route calculation failed."
-            print("Route calculation failed: \(errorMessage)")
-            self.errorMessage = errorMessage
-            self.showingError = true
+    var body: some View {
+        Map(coordinateRegion: $region, annotationItems: annotations) { annotation in
+            MapMarker(coordinate: annotation.coordinate, tint: annotation.title == "Start" ? .green : .red)
         }
-    }
-    
-    private func formatTravelTime(_ seconds: TimeInterval) -> String {
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.hour, .minute]
-        formatter.unitsStyle = .abbreviated
-        return formatter.string(from: seconds) ?? ""
+        .overlay(
+            MapOverlay(route: route)
+        )
     }
 }
 
-// Custom Annotation Struct
-struct CustomAnnotation: Identifiable {
+struct MapAnnotation: Identifiable {
     let id = UUID()
     let coordinate: CLLocationCoordinate2D
-    let color: Color
+    let title: String
+}
+
+struct MapOverlay: View {
+    let route: MKRoute
+    
+    var body: some View {
+        GeometryReader { geometry in
+            Path { path in
+                var isFirst = true
+                for coordinate in route.polyline.coordinates() {
+                    let point = geometry.coordinateToPoint(coordinate)
+                    if isFirst {
+                        path.move(to: point)
+                        isFirst = false
+                    } else {
+                        path.addLine(to: point)
+                    }
+                }
+            }
+            .stroke(Color.blue, lineWidth: 3)
+        }
+    }
+}
+
+extension GeometryProxy {
+    func coordinateToPoint(_ coordinate: CLLocationCoordinate2D) -> CGPoint {
+        let frame = self.frame(in: .global)
+        let regionWidth = frame.width / (frame.height / 256)
+        let longitudeRatio = (coordinate.longitude + 180) / 360
+        let latitudeRatio = (coordinate.latitude + 90) / 180
+        return CGPoint(
+            x: frame.width * CGFloat(longitudeRatio),
+            y: frame.height * CGFloat(1 - latitudeRatio)
+        )
+    }
+}
+
+extension MKPolyline {
+    func coordinates() -> [CLLocationCoordinate2D] {
+        var coords = [CLLocationCoordinate2D](repeating: kCLLocationCoordinate2DInvalid, count: pointCount)
+        getCoordinates(&coords, range: NSRange(location: 0, length: pointCount))
+        return coords
+    }
+}
+
+
+
+struct CustomMapView_Previews: PreviewProvider {
+    static var previews: some View {
+        CustomMapView(
+            route: MKRoute(),
+            sourceCoordinate: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
+            destinationCoordinate: CLLocationCoordinate2D(latitude: 37.3382, longitude: -121.8863)
+        )
+    }
 }

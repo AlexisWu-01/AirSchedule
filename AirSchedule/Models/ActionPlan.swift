@@ -30,6 +30,9 @@ struct ActionPlan: Codable {
                 if component.type == "meetingAvailability",
                    let meetingData = context["meetingAvailabilityData"]?.value as? [String: AnyCodable] {
                     components[index].properties = meetingData
+                } else if component.type == "map",
+                          let mapData = context["mapData"]?.value as? [String: AnyCodable] {
+                    components[index].properties["mapData"] = AnyCodable(mapData)
                 } else if component.type == "text",
                           let meetingData = context["meetingAvailabilityData"]?.value as? [String: AnyCodable],
                           let canMakeIt = meetingData["canMakeIt"]?.value as? Bool,

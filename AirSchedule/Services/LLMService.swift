@@ -503,6 +503,7 @@ class LLMService {
         You are a helpful assistant. Given a list of events with details such as event name, start time, and location, and a user query, identify which event is most relevant to the query. Return ONLY the index number of the best matching event. If no event matches, return -1.
         
         Consider the following:
+        - Always only return an index.
         - Match the event name, location, or start time as closely as possible to the user's query.
         - If multiple events seem to match, prioritize those with the closest start time to the user's query.
         - If no events match, return -1.
@@ -538,7 +539,7 @@ class LLMService {
         Expected Output: 1 (as the event name matches the query and the user is asking about a specific event)
     """ 
         let messages: [[String: String]] = [
-            ["role": "system", "content": "You are a helpful assistant."],
+            ["role": "system", "content": prompt],
             ["role": "user", "content": context]
         ]
         
