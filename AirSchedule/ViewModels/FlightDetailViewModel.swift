@@ -39,6 +39,7 @@ class FlightDetailViewModel: ObservableObject {
                 if let decodingError = error as? DecodingError {
                     print("Decoding error: \(decodingError)")
                 }
+                self.handleLLMError(error)
                 completion(false, error)
             }
         }
@@ -61,10 +62,12 @@ class FlightDetailViewModel: ObservableObject {
                 }
                 print("Debug: Updated context in FlightDetailViewModel: \(self.context)")
                 
-                // Update UI components after all actions are executed
-                self.uiComponents = actionPlan.uiComponents ?? []
-                self.updateUI()
+                // Update UI components using the updateUIComponents closure
+                var updatedUIComponents = actionPlan.uiComponents
+                actionPlan.updateUIComponents?(&updatedUIComponents, self.context)
+                self.uiComponents = updatedUIComponents
                 
+                self.updateUI()
                 completion(success, error)
             }
         }

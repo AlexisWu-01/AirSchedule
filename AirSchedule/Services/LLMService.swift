@@ -202,7 +202,10 @@ class LLMService {
                 "api": "calendar",
                 "method": "getEventDetails",
                 "parameters": {
-                    "event": "apple meeting"
+                    "event": "apple meeting",
+                    "startTime": "startTime", // To be dynamically replaced with actual event start time.
+                    "location": "location", // To be dynamically replaced with actual event location.
+                    
                 }
                 },
                 {
@@ -227,7 +230,7 @@ class LLMService {
             type": "meetingAvailability",
                 "properties": {
                 "title": "Apple Meeting",
-                "time": "2024-10-15T15:30:00Z",
+                "startTime": "2024-10-15T15:30:00Z", 
                 "location": "Apple Park, Cupertino, CA"
                 }
                 },
@@ -255,6 +258,10 @@ class LLMService {
             3. **Calculate Travel Time:** Use the `maps` API to determine the travel time from the arrival airport to the meeting location based on the arrival time.
             4. **Determine Feasibility:** Compare the travel time with the time remaining until the meeting to decide if the user can make it on time.
             5. **UI Components:** Display a message indicating whether the user can make it and show the route on a map.
+
+            **Special Note:**
+            - The startTime and location in the meetingAvailability component are placeholders and should be dynamically replaced with actual event start time and location from the calendar API response.
+            - The actual meeting data will be inserted into these properties after the calendar action is executed.
 
             ---
 
@@ -335,6 +342,7 @@ class LLMService {
                     "content": "Flight AS3478 emits 120.5 kg of CO₂."
                 }
                 }
+  
             ]
             }
             ```

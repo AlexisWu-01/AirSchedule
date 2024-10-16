@@ -56,10 +56,8 @@ class ActionExecutor {
                     if let eventStartTime = availabilityInfo["eventStartTime"] as? Date {
                         let meetingAvailabilityData: [String: AnyCodable] = [
                             "title": AnyCodable(availabilityInfo["event"] as? String ?? ""),
-                            "time": AnyCodable(ISO8601DateFormatter().string(from: eventStartTime)),
+                            "startTime": AnyCodable(ISO8601DateFormatter().string(from: eventStartTime)),
                             "location": AnyCodable(availabilityInfo["eventLocation"] as? String ?? "Unknown"),
-                            "isAvailable": AnyCodable(availabilityInfo["isAvailable"] as? Bool ?? false),
-                            "flightArrivalTime": AnyCodable(ISO8601DateFormatter().string(from: flightArrivalTime))
                         ]
                         
                         let updatedContext: [String: AnyCodable] = [

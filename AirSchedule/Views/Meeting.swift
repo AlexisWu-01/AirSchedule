@@ -14,11 +14,8 @@ struct MeetingAvailabilityView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text(meetingData["title"]?.value as? String ?? "Unknown Event")
                 .font(.headline)
-            Text("Time: \(formattedTime(meetingData["time"]?.value as? String))")
+            Text("StartTime: \(formattedTime(meetingData["startTime"]?.value as? String))")
             Text("Location: \(meetingData["location"]?.value as? String ?? "Unknown Location")")
-            Text("Available: \(meetingData["isAvailable"]?.value as? Bool == true ? "Yes" : "No")")
-                .foregroundColor(meetingData["isAvailable"]?.value as? Bool == true ? .green : .red)
-            Text("Flight Arrival: \(formattedTime(meetingData["flightArrivalTime"]?.value as? String))")
         }
         .padding()
         .background(Color.blue.opacity(0.1))
