@@ -81,7 +81,7 @@ class LLMService {
             **Available APIs:**
             - **flight_data**: Provides detailed flight information.
             - **calendar**: Manages user schedules and events.
-            - **weather**: Offers current and forecasted weather information.
+            - **weather**: Offers current and forecasted weather information for the arrival airport through api.
             - **maps**: Supplies navigation and location-based data.
             - **clothing_advice**: Suggests appropriate attire based on weather and event type.
 

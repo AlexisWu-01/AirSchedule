@@ -33,6 +33,12 @@ class ActionExecutor {
                     completion(result)
                 }
             }
+        case "weather":
+            handleWeatherAction(action, context: context) { result in
+                DispatchQueue.main.async {
+                    completion(result)
+                }
+            }
         default:
             DispatchQueue.main.async {
                 completion(.failure(APIError.unknown))
@@ -185,6 +191,25 @@ class ActionExecutor {
                 completion(.success(route.expectedTravelTime))
             } else {
                 completion(.failure(APIError.noData))
+            }
+        }
+    }
+    
+    private func handleWeatherAction(_ action: Action, context: [String: Any], completion: @escaping (Result<[String: AnyCodable], Error>) -> Void) {
+        guard let flight = context["flight"] as? Flight else {
+            completion(.failure(APIError.invalidParameters))
+            return
+        }
+        
+        let location = flight.arrivalAirport
+        let time = ISO8601DateFormatter().string(from: flight.actualArrivalTime ?? flight.arrivalTime)
+        
+        WeatherService.shared.getForecast(location: location, time: time) { result in
+            switch result {
+            case .success(let weatherData):
+                completion(.success(["weatherData": AnyCodable(weatherData)]))
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
     }

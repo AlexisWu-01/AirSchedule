@@ -75,6 +75,12 @@ struct DynamicUIRenderer: View {
                         print("Debug: Invalid text data in component: \(component.properties)")
                     }
             }
+        case "weather":
+            if let weatherData = component.properties["weatherData"]?.value as? [String: AnyCodable] {
+                WeatherView(weatherData: weatherData)
+            } else {
+                Text("Invalid weather data")
+            }
         default:
             Text("Unsupported component type: \(component.type)")
                 .onAppear {
@@ -129,18 +135,38 @@ struct DynamicUIRenderer: View {
     
     // MARK: - Weather View
     struct WeatherView: View {
-        let weatherDescription: String
+        let weatherData: [String: AnyCodable]
         
         var body: some View {
-            HStack {
-                Image(systemName: "sun.max.fill")
-                    .foregroundColor(.yellow)
-                Text("Weather: \(weatherDescription)")
-                    .font(.body)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Weather at \(weatherData["location"]?.value as? String ?? "Unknown")")
+                    .font(.headline)
+                HStack {
+                    Image(systemName: weatherIcon)
+                        .font(.largeTitle)
+                    VStack(alignment: .leading) {
+                        Text(weatherData["weather"]?.value as? String ?? "Unknown")
+                            .font(.subheadline)
+                        if let time = weatherData["time"]?.value as? String {
+                            Text("Time: \(time)")
+                                .font(.caption)
+                        }
+                    }
+                }
             }
             .padding()
-            .background(Color.orange.opacity(0.1))
-            .cornerRadius(8)
+            .background(Color.blue.opacity(0.1))
+            .cornerRadius(10)
+        }
+        
+        private var weatherIcon: String {
+            switch weatherData["weather"]?.value as? String {
+            case "Sunny": return "sun.max.fill"
+            case "Cloudy": return "cloud.fill"
+            case "Rainy": return "cloud.rain.fill"
+            case "Windy": return "wind"
+            default: return "questionmark.circle.fill"
+            }
         }
     }
 }
