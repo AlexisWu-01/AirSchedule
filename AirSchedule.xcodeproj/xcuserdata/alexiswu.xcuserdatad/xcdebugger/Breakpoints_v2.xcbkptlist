@@ -114,5 +114,177 @@
             </Locations>
          </BreakpointContent>
       </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "DDBD30C7-00A4-463E-98F9-BBB42E8F7339"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "AirSchedule/Services/CalendarService.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "171"
+            endingLineNumber = "171"
+            landmarkName = "checkAvailability(event:time:flightArrivalTime:completion:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F074C95B-FA4E-45A2-A9DE-6C5A7C819836"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "AirSchedule/Services/CalendarService.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "143"
+            endingLineNumber = "143"
+            landmarkName = "checkAvailability(event:time:flightArrivalTime:completion:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "F074C95B-FA4E-45A2-A9DE-6C5A7C819836 - a82c5db93f056a48"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AirSchedule.CalendarService.checkAvailability(event: Swift.Optional&lt;Swift.String&gt;, time: Swift.Optional&lt;Swift.String&gt;, flightArrivalTime: Foundation.Date, completion: (Swift.Result&lt;Swift.Dictionary&lt;Swift.String, Any&gt;, Swift.Error&gt;) -&gt; ()) -&gt; ()"
+                  moduleName = "AirSchedule.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/alexiswu/brainai_test/AirSchedule/AirSchedule/Services/CalendarService.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "143"
+                  endingLineNumber = "143">
+               </Location>
+               <Location
+                  uuid = "F074C95B-FA4E-45A2-A9DE-6C5A7C819836 - 8214edaf1a491b78"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Result&lt;Swift.Array&lt;__C.EKEvent&gt;, Swift.Error&gt;) -&gt; () in AirSchedule.CalendarService.checkAvailability(event: Swift.Optional&lt;Swift.String&gt;, time: Swift.Optional&lt;Swift.String&gt;, flightArrivalTime: Foundation.Date, completion: (Swift.Result&lt;Swift.Dictionary&lt;Swift.String, Any&gt;, Swift.Error&gt;) -&gt; ()) -&gt; ()"
+                  moduleName = "AirSchedule.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/alexiswu/brainai_test/AirSchedule/AirSchedule/Services/CalendarService.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "145"
+                  endingLineNumber = "145">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "D7C518E5-CD5D-47AD-82A1-379F93123F40"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "AirSchedule/Services/CalendarService.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "139"
+            endingLineNumber = "139"
+            landmarkName = "checkAvailability(event:time:flightArrivalTime:completion:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "0FDCC1EF-BE05-46FA-A2BB-348CDE067E2A"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "AirSchedule/Services/CalendarService.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "61"
+            endingLineNumber = "61"
+            landmarkName = "fetchMeetings(for:completion:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "32A57652-046F-4637-9E06-6A9FF4C52714"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "AirSchedule/Models/ActionExecutor.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "19"
+            endingLineNumber = "19"
+            landmarkName = "executeAction(_:context:completion:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "32A57652-046F-4637-9E06-6A9FF4C52714 - fa4fc26c9af52c86"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AirSchedule.ActionExecutor.executeAction(_: AirSchedule.Action, context: Swift.Dictionary&lt;Swift.String, Any&gt;, completion: (Swift.Result&lt;Swift.Dictionary&lt;Swift.String, AirSchedule.AnyCodable&gt;, Swift.Error&gt;) -&gt; ()) -&gt; ()"
+                  moduleName = "AirSchedule.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/alexiswu/brainai_test/AirSchedule/AirSchedule/Models/ActionExecutor.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "19"
+                  endingLineNumber = "19">
+               </Location>
+               <Location
+                  uuid = "32A57652-046F-4637-9E06-6A9FF4C52714 - 7d62a3673ec5398b"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Result&lt;Swift.Dictionary&lt;Swift.String, AirSchedule.AnyCodable&gt;, Swift.Error&gt;) -&gt; () in AirSchedule.ActionExecutor.executeAction(_: AirSchedule.Action, context: Swift.Dictionary&lt;Swift.String, Any&gt;, completion: (Swift.Result&lt;Swift.Dictionary&lt;Swift.String, AirSchedule.AnyCodable&gt;, Swift.Error&gt;) -&gt; ()) -&gt; ()"
+                  moduleName = "AirSchedule.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/alexiswu/brainai_test/AirSchedule/AirSchedule/Models/ActionExecutor.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "20"
+                  endingLineNumber = "20">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "D413F815-EF15-4B7F-8B27-29862B02F256"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "AirSchedule/Models/ActionExecutor.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "46"
+            endingLineNumber = "46"
+            landmarkName = "handleCalendarAction(_:context:completion:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "9454E3DA-CB9D-48D2-94B6-B65FEE745AB3"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "AirSchedule/Services/LLMService.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "504"
+            endingLineNumber = "504"
+            landmarkName = "getCompletion(for:completion:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
    </Breakpoints>
 </Bucket>

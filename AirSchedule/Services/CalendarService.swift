@@ -143,7 +143,7 @@ class CalendarService {
         fetchEvents(from: startDate, to: endDate) { result in
             switch result {
             case .success(let events):
-                self.findClosestEventUsingLLM(events: events, query: event ?? "", completion: { result in
+                self.findClosestEventUsingLLM(events: events, query: event ?? "") { result in
                     switch result {
                     case .success(let closestEvent):
                         let isAvailable = closestEvent.startDate > flightArrivalTime
@@ -159,9 +159,21 @@ class CalendarService {
                         ]
                         completion(.success(availabilityInfo))
                     case .failure(let error):
-                        completion(.failure(error))
+                        if (error as NSError).domain == "No matching event" {
+                            let availabilityInfo: [String: Any] = [
+                                "isAvailable": true,
+                                "event": "No matching events found",
+                                "flightArrivalTime": flightArrivalTime,
+                                "eventStartTime": NSNull(),
+                                "timeDifference": NSNull(),
+                                "eventLocation": NSNull()
+                            ]
+                            completion(.success(availabilityInfo))
+                        } else {
+                            completion(.failure(error))
+                        }
                     }
-                })
+                }
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -169,21 +181,21 @@ class CalendarService {
     }
 
     private func findClosestEventUsingLLM(events: [EKEvent], query: String, completion: @escaping (Result<EKEvent, Error>) -> Void) {
-        let eventsInfo = events.map { event in
-            return [
-                "title": event.title,
-                "startDate": ISO8601DateFormatter().string(from: event.startDate),
-                "location": event.location ?? "Unknown"
-            ]
+        if events.isEmpty {
+            completion(.failure(NSError(domain: "No events found", code: -1, userInfo: nil)))
+            return
         }
+        print("Found \(events.count) events")
+
+        let eventsInfo = events.enumerated().map { index, event in
+            "[\(index)] Title: \(event.title), Start: \(ISO8601DateFormatter().string(from: event.startDate)), Location: \(event.location ?? "Unknown")"
+        }.joined(separator: "\n")
 
         let prompt = """
         Given the following events and a user query, determine which event is most likely the one the user is referring to. Return ONLY the index number of the best matching event. If no event matches, return -1.
 
         Events:
-        \(eventsInfo.enumerated().map { index, event in
-            "[\(index)] Title: \(event["title"] ?? ""), Start: \(event["startDate"] ?? ""), Location: \(event["location"] ?? "")"
-        }.joined(separator: "\n"))
+        \(eventsInfo)
 
         User Query: "\(query)"
 
@@ -196,6 +208,10 @@ class CalendarService {
                 if let index = Int(response.trimmingCharacters(in: .whitespacesAndNewlines)),
                    index >= 0 && index < events.count {
                     completion(.success(events[index]))
+                    print("Closest event found: \(events[index])")
+                } else if let index = Int(response.trimmingCharacters(in: .whitespacesAndNewlines)),
+                          index == -1 {
+                    completion(.failure(NSError(domain: "No matching event", code: -1, userInfo: nil)))
                 } else {
                     completion(.failure(NSError(domain: "Invalid LLM response", code: -1, userInfo: nil)))
                 }
@@ -213,54 +229,6 @@ class CalendarService {
                 completion(.success(events))
             } else {
                 completion(.failure(NSError(domain: "Calendar access not authorized", code: -1, userInfo: nil)))
-            }
-        }
-    }
-
-    private func handleCalendarAction(_ action: Action, context: inout [String: Any], completion: @escaping (Result<[String: AnyCodable], Error>) -> Void) {
-        guard let parameters = action.parameters else {
-            print("Error: Missing parameters for calendar action")
-            completion(.failure(NSError(domain: "Missing parameters", code: -1, userInfo: nil)))
-            return
-        }
-        
-        let event = parameters["event"]?.value as? String
-        let time = parameters["time"]?.value as? String
-        
-        guard let flight = context["flight"] as? Flight else {
-            completion(.failure(NSError(domain: "Missing flight information", code: -1, userInfo: nil)))
-            return
-        }
-        
-        let flightArrivalTime = flight.actualArrivalTime
-        
-        print("Executing calendar action for event: \(event ?? "nil") at time: \(time ?? "nil")")
-        
-        CalendarService.shared.checkAvailability(event: event, time: time, flightArrivalTime: flightArrivalTime) { [context] result in
-            switch result {
-            case .success(let availabilityInfo):
-                print("Calendar availability check successful: \(availabilityInfo)")
-                if let isAvailable = availabilityInfo["isAvailable"] as? Bool,
-                   let eventLocation = availabilityInfo["eventLocation"] as? String {
-                    var resultContext: [String: AnyCodable] = [
-                        "isAvailable": AnyCodable(isAvailable),
-                        "eventLocation": AnyCodable(eventLocation)
-                    ]
-                    if let eventStartTime = availabilityInfo["eventStartTime"] as? Date {
-                        resultContext["eventStartTime"] = AnyCodable(eventStartTime)
-                    }
-                    
-                    // Update the context on the main thread
-                    DispatchQueue.main.async {
-//                        context["eventLocation"] = eventLocation
-                        completion(.success(resultContext))
-                    }
-                } else {
-                    completion(.failure(NSError(domain: "Invalid availability info", code: -1, userInfo: nil)))
-                }
-            case .failure(let error):
-                print("Calendar availability check failed: \(error.localizedDescription)")
-                completion(.failure(error))
             }
         }
     }

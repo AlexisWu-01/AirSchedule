@@ -41,39 +41,41 @@ class ActionExecutor {
     }
     
     private func handleCalendarAction(_ action: Action, context: [String: Any], completion: @escaping (Result<[String: AnyCodable], Error>) -> Void) {
-        // Implement calendar action handling
-        // Ensure all context updates are wrapped in main thread
         DispatchQueue.global().async {
-            // Simulate fetching event details
-            // Replace this with actual calendar API integration
-            guard let event = action.parameters?["event"]?.value as? String else {
+            guard let event = action.parameters?["event"]?.value as? String,
+                  let flight = context["flight"] as? Flight else {
                 completion(.failure(APIError.invalidParameters))
                 return
             }
             
-            // Simulate successful fetch
-            let eventDetails: [String: AnyCodable] = [
-                "eventStartTime": AnyCodable(Date()),
-                "isAvailable": AnyCodable(true),
-                "event": AnyCodable(event),
-                "eventLocation": AnyCodable("Apple Park\nApple Inc., 1 Apple Park Way, Cupertino, CA 95014, United States"),
-                "flightArrivalTime": AnyCodable((context["flight"] as? Flight)?.arrivalTime ?? Date()),
-                "timeDifference": AnyCodable(11040.0) // Example value
-            ]
-            completion(.success(eventDetails))
+            let flightArrivalTime = flight.actualArrivalTime ?? flight.arrivalTime
+            
+            CalendarService.shared.checkAvailability(event: event, time: nil, flightArrivalTime: flightArrivalTime) { result in
+                switch result {
+                case .success(let availabilityInfo):
+                    let eventDetails: [String: AnyCodable] = [
+                        "eventStartTime": AnyCodable(availabilityInfo["eventStartTime"] as? Date ?? Date()),
+                        "isAvailable": AnyCodable(availabilityInfo["isAvailable"] as? Bool ?? false),
+                        "event": AnyCodable(availabilityInfo["event"] as? String ?? ""),
+                        "eventLocation": AnyCodable(availabilityInfo["eventLocation"] as? String ?? "Unknown"),
+                        "flightArrivalTime": AnyCodable(availabilityInfo["flightArrivalTime"] as? Date ?? Date()),
+                        "timeDifference": AnyCodable(availabilityInfo["timeDifference"] as? TimeInterval ?? 0)
+                    ]
+                    completion(.success(eventDetails))
+                case .failure(let error):
+                    completion(.failure(error))
+                }
+            }
         }
     }
     
     private func handleFlightDataAction(_ action: Action, context: [String: Any], completion: @escaping (Result<[String: AnyCodable], Error>) -> Void) {
-        // Implement flight data action handling
         DispatchQueue.global().async {
-            // Simulate fetching flight status
             guard let flightNumber = action.parameters?["flightNumber"]?.value as? String else {
                 completion(.failure(APIError.invalidParameters))
                 return
             }
             
-            // Simulate successful fetch
             let flightStatus: [String: AnyCodable] = [
                 "flightNumber": AnyCodable(flightNumber),
                 "status": AnyCodable("On Time")

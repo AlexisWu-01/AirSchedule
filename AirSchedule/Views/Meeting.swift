@@ -7,6 +7,11 @@
 //
 import SwiftUI
 
+struct Meeting: Codable {
+    let title: String
+    let startTime: Date
+    let location: String
+}
 struct MeetingAvailabilityView: View {
     let title: String
     let time: Date
