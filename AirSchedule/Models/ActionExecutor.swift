@@ -126,7 +126,7 @@ class ActionExecutor {
                         updatedMeetingData["travelTime"] = AnyCodable(travelTime)
                         
                         let arrivalTime = flight.actualArrivalTime ?? flight.arrivalTime
-                        let arrivalPlusTravel = arrivalTime.addingTimeInterval(travelTime)
+                        let arrivalPlusTravel = arrivalTime.addingTimeInterval(travelTime+20*60)
                         let canMakeIt = arrivalPlusTravel <= eventStartTime
                         updatedMeetingData["canMakeIt"] = AnyCodable(canMakeIt)
                         

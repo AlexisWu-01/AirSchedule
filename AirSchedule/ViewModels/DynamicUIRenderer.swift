@@ -27,9 +27,6 @@ struct DynamicUIRenderer: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                Text("Debug: DynamicUIRenderer with \(uiComponents.count) components")
-                    .foregroundColor(.red)
-                    .padding(.top)
                 
                 ForEach(uiComponents) { component in
                     renderComponent(component)

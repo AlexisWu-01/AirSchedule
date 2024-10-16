@@ -185,7 +185,7 @@ class CalendarService {
             completion(.failure(NSError(domain: "No events found", code: -1, userInfo: nil)))
             return
         }
-        print("Found \(events.count) events")
+    
 
         let eventsInfo = events.enumerated().map { index, event in
             "[\(index)] Title: \(event.title), Start: \(ISO8601DateFormatter().string(from: event.startDate)), Location: \(event.location ?? "Unknown")"
