@@ -808,7 +808,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "B0480BE4-0F94-47C5-82DF-8F0A36C5DAD6"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "AirSchedule/ViewModels/DynamicUIRenderer.swift"
@@ -818,43 +818,13 @@
             endingLineNumber = "61"
             landmarkName = "renderComponent(_:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "B0480BE4-0F94-47C5-82DF-8F0A36C5DAD6 - d1814bc5f728c92"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "AirSchedule.DynamicUIRenderer.renderComponent(AirSchedule.UIComponent) -&gt; some"
-                  moduleName = "AirSchedule.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/alexiswu/brainai_test/AirSchedule/AirSchedule/ViewModels/DynamicUIRenderer.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "63"
-                  endingLineNumber = "63">
-               </Location>
-               <Location
-                  uuid = "B0480BE4-0F94-47C5-82DF-8F0A36C5DAD6 - d1814bc5f728cd4"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "AirSchedule.DynamicUIRenderer.renderComponent(AirSchedule.UIComponent) -&gt; some"
-                  moduleName = "AirSchedule.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/alexiswu/brainai_test/AirSchedule/AirSchedule/ViewModels/DynamicUIRenderer.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "61"
-                  endingLineNumber = "61">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "CBEF60B2-431E-447F-A40F-3C1F3F671B94"
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "AirSchedule/Services/WeatherService.swift"
@@ -886,7 +856,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "FD3C05BF-EBA4-468E-B8EB-92EA0D068072"
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "AirSchedule/Services/WeatherService.swift"
@@ -1046,7 +1016,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "0B2EF170-9C3E-4CF4-A363-613C6C484628"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "AirSchedule/ViewModels/DynamicUIRenderer.swift"
@@ -1056,36 +1026,6 @@
             endingLineNumber = "51"
             landmarkName = "renderComponent(_:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "0B2EF170-9C3E-4CF4-A363-613C6C484628 - d1814bc5f728ffd"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "AirSchedule.DynamicUIRenderer.renderComponent(AirSchedule.UIComponent) -&gt; some"
-                  moduleName = "AirSchedule.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/alexiswu/brainai_test/AirSchedule/AirSchedule/ViewModels/DynamicUIRenderer.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "52"
-                  endingLineNumber = "52">
-               </Location>
-               <Location
-                  uuid = "0B2EF170-9C3E-4CF4-A363-613C6C484628 - d1814bc5f728e1e"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "AirSchedule.DynamicUIRenderer.renderComponent(AirSchedule.UIComponent) -&gt; some"
-                  moduleName = "AirSchedule.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/alexiswu/brainai_test/AirSchedule/AirSchedule/ViewModels/DynamicUIRenderer.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "51"
-                  endingLineNumber = "51">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1252,7 +1192,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "1685B61C-46BC-459A-A0DC-03255BB1D037"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "AirSchedule/ViewModels/DynamicUIRenderer.swift"
@@ -1262,36 +1202,54 @@
             endingLineNumber = "48"
             landmarkName = "renderComponent(_:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "1685B61C-46BC-459A-A0DC-03255BB1D037 - d1814bc5f728e61"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "AirSchedule.DynamicUIRenderer.renderComponent(AirSchedule.UIComponent) -&gt; some"
-                  moduleName = "AirSchedule.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/alexiswu/brainai_test/AirSchedule/AirSchedule/ViewModels/DynamicUIRenderer.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "48"
-                  endingLineNumber = "48">
-               </Location>
-               <Location
-                  uuid = "1685B61C-46BC-459A-A0DC-03255BB1D037 - d1814bc5f728e40"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "AirSchedule.DynamicUIRenderer.renderComponent(AirSchedule.UIComponent) -&gt; some"
-                  moduleName = "AirSchedule.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/alexiswu/brainai_test/AirSchedule/AirSchedule/ViewModels/DynamicUIRenderer.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "49"
-                  endingLineNumber = "49">
-               </Location>
-            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "2E3D3F75-7E75-4E04-8E43-817C0F597FCC"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "AirSchedule/ViewModels/DynamicUIRenderer.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "72"
+            endingLineNumber = "72"
+            landmarkName = "renderComponent(_:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "D2F7F02B-8EC8-4581-A88A-5CBCBA645B7D"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "AirSchedule/ViewModels/DynamicUIRenderer.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "47"
+            endingLineNumber = "47"
+            landmarkName = "renderComponent(_:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "474CBBAE-3E5B-4A63-9702-B18FE02D237B"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "AirSchedule/Models/ActionExecutor.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "215"
+            endingLineNumber = "215"
+            landmarkName = "handleWeatherAction(_:context:completion:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

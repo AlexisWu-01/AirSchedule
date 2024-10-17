@@ -69,6 +69,12 @@ struct DynamicUIRenderer: View {
             } else {
                 AnyView(Text("Invalid text data"))
             }
+        case "weather":
+            if let weatherData = component.properties["weatherData"]?.value as? [String: Any] {
+                AnyView(ImprovedWeatherView(weatherData: weatherData))
+            } else {
+                AnyView(Text("Invalid weather data"))
+            }
         default:
             AnyView(Text("Unsupported component type: \(component.type)"))
         }
@@ -220,7 +226,7 @@ struct DynamicUIRenderer: View {
     }
     
     struct ImprovedWeatherView: View {
-        let weatherData: [String: AnyCodable]
+        let weatherData: [String: Any]
         
         var body: some View {
             VStack(alignment: .leading, spacing: 10) {
@@ -233,16 +239,16 @@ struct DynamicUIRenderer: View {
                         .foregroundColor(.airBlue)
                     
                     VStack(alignment: .leading) {
-                        Text(weatherData["weather"]?.value as? String ?? "Unknown")
+                        Text(weatherData["weather"] as? String ?? "Unknown")
                             .font(.title2)
-                        if let temperature = weatherData["temperature"]?.value as? Int {
+                        if let temperature = weatherData["temperature"] as? Int {
                             Text("\(temperature)°F")
                                 .font(.title3)
                                 .foregroundColor(.airBlue)
                         }
-                        Text(weatherData["location"]?.value as? String ?? "Unknown Location")
+                        Text(weatherData["location"] as? String ?? "Unknown Location")
                             .font(.subheadline)
-                        Text(formattedTime(weatherData["time"]?.value as? String ?? ""))
+                        Text(formattedTime(weatherData["time"] as? String ?? ""))
                             .font(.subheadline)
                             .foregroundColor(.airDarkGray)
                     }
@@ -255,7 +261,7 @@ struct DynamicUIRenderer: View {
         }
         
         private var weatherIcon: String {
-            switch weatherData["weather"]?.value as? String {
+            switch weatherData["weather"] as? String {
             case "Sunny": return "sun.max.fill"
             case "Cloudy": return "cloud.fill"
             case "Rainy": return "cloud.rain.fill"

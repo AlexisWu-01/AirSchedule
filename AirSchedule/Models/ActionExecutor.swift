@@ -202,7 +202,19 @@ class ActionExecutor {
         WeatherService.shared.getForecast(location: location, time: time) { result in
             switch result {
             case .success(let weatherData):
-                completion(.success(["weatherData": AnyCodable(weatherData)]))
+                // Unwrap the AnyCodable values
+                let unwrappedWeatherData: [String: Any] = weatherData.mapValues { $0.value }
+                
+                // Create a new UIComponent with the unwrapped data
+                let weatherComponent = UIComponent(type: "weather", properties: ["weatherData": AnyCodable(unwrappedWeatherData)])
+                
+                // Create the final result with the new UIComponent
+                let finalResult: [String: AnyCodable] = [
+                    "weatherData": AnyCodable(unwrappedWeatherData),
+                    "ui_components": AnyCodable([weatherComponent])
+                ]
+                
+                completion(.success(finalResult))
             case .failure(let error):
                 completion(.failure(error))
             }
