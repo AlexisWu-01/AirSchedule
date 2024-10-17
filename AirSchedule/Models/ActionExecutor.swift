@@ -158,7 +158,7 @@ class ActionExecutor {
                 
                 // Add text component for travel time
                 let travelTimeMinutes = Int(route.expectedTravelTime / 60) + 20
-                let textContent = "The travel time is \(travelTimeMinutes) minutes. You \(canMakeIt ? "will" : "might not") be able to make it to the meeting on time."
+                let textContent = "The travel time is \(travelTimeMinutes-20) minutes. You \(canMakeIt ? "will" : "might not") be able to make it to the meeting on time."
                 let textComponent = UIComponent(type: "text", properties: [
                     "content": AnyCodable(textContent),
                     "travelTime": AnyCodable(travelTimeMinutes),
