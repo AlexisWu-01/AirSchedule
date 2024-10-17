@@ -1,13 +1,21 @@
-# AirSchedule
+# AirSchedule 
+
+<div align="center">
+  <img src="https://github.com/AlexisWu-01/AirSchedule/raw/main/demo/app_icon.jpg" alt="AirSchedule App Icon" width="128" height="128">
+</div>
 
 AirSchedule is a comprehensive travel information application designed to help users manage their flights and related activities seamlessly. By leveraging advanced language models and integrating multiple backend services, AirSchedule provides real-time flight details, meeting schedules, weather forecasts, navigation assistance, and personalized clothing advice. Whether you're planning your travel itinerary or ensuring you can make it to important meetings on time, AirSchedule is your go-to solution.
 
 
-
-![AirSchedule Demo](https://github.com/AlexisWu-01/AirSchedule/blob/main/demo/App_demo.png)
-*Screenshot: An in-app screenshot.*
-
-[**Click here to watch a 10 minutes demo video on Youtube.**](https://www.youtube.com/watch?v=99r264qkgGo) 
+<div align="center">
+  <img src="https://github.com/AlexisWu-01/AirSchedule/blob/main/demo/App_demo.png" alt="AirSchedule Interface Demo" width="600">
+  <p><em>AirSchedule main interface demonstration</em></p>
+</div>
+<div align="center">
+  <a href="https://www.youtube.com/watch?v=99r264qkgGo">
+    <strong>📺 Watch the 10-minute demo video</strong>
+  </a>
+</div>
 
 
 ## Table of Contents
@@ -94,12 +102,17 @@ AirSchedule employs a modular and scalable architecture, ensuring flexibility, h
 
 ### System Diagram
 
-![System Diagram](https://github.com/AlexisWu-01/AirSchedule/raw/main/demo/architecture_diagram.svg)
-*Click to zoom in the SVG file*
-### Workflow Diagram
+<div align="center">
+  <img src="https://github.com/AlexisWu-01/AirSchedule/raw/main/demo/architecture_diagram.svg" alt="System Architecture Diagram" width="800">
+  <p><em>System architecture overview - Click to view full size</em></p>
+</div>
 
-![Workflow Diagram](https://github.com/AlexisWu-01/AirSchedule/raw/main/demo/workflow_diagram.svg)
-*Click to zoom in the SVG file*
+### Workflow Diagram
+<div align="center">
+  <img src="https://github.com/AlexisWu-01/AirSchedule/raw/main/demo/workflow_diagram.svg" alt="Workflow Diagram" width="800">
+  <p><em>Application workflow overview - Click to view full size</em></p>
+</div>
+
 
 
 ### Key Components
