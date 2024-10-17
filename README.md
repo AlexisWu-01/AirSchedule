@@ -2,6 +2,14 @@
 
 AirSchedule is a comprehensive travel information application designed to help users manage their flights and related activities seamlessly. By leveraging advanced language models and integrating multiple backend services, AirSchedule provides real-time flight details, meeting schedules, weather forecasts, navigation assistance, and personalized clothing advice. Whether you're planning your travel itinerary or ensuring you can make it to important meetings on time, AirSchedule is your go-to solution.
 
+
+
+![AirSchedule Demo](https://github.com/AlexisWu-01/AirSchedule/blob/main/demo/App_demo.png)
+*Screenshot: An in-app screenshot.*
+
+[**Click here to watch a 10 minutes demo video on Youtube.**](https://www.youtube.com/watch?v=99r264qkgGo) 
+
+
 ## Table of Contents
 
 - [AirSchedule](#airschedule)
