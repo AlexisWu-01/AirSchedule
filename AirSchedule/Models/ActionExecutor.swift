@@ -100,53 +100,79 @@ class ActionExecutor {
     }
     
     private func handleMapsAction(_ action: Action, context: [String: Any], completion: @escaping (Result<[String: AnyCodable], Error>) -> Void) {
-        print("Debug: Entering handleMapsAction")
+        print("Debug: ActionExecutor - handleMapsAction called")
         
         guard let flight = context["flight"] as? Flight,
               let meetingAvailabilityData = context["meetingAvailabilityData"] as? [String: AnyCodable],
               let eventLocation = meetingAvailabilityData["location"]?.value as? String,
               let eventStartTimeString = meetingAvailabilityData["startTime"]?.value as? String,
               let eventStartTime = ISO8601DateFormatter().date(from: eventStartTimeString) else {
-            print("Error: Missing or invalid data in context")
+            print("Debug: ActionExecutor - Missing or invalid data in context")
             completion(.failure(APIError.invalidParameters))
             return
         }
         
-        let fromCoordinate = getAirportCoordinate(for: flight.arrivalAirport)
+        print("Debug: ActionExecutor - Calling MapsService with from: \(flight.arrivalAirport), to: \(eventLocation)")
         
-        geocodeAddress(eventLocation) { result in
+        MapsService.shared.getDirections(from: flight.arrivalAirport, to: eventLocation, arrivalTime: flight.actualArrivalTime ?? flight.arrivalTime) { result in
             switch result {
-            case .success(let toCoordinate):
-                self.calculateTravelTime(from: fromCoordinate, to: toCoordinate) { travelTimeResult in
-                    switch travelTimeResult {
-                    case .success(let travelTime):
-                        let mapData: [String: AnyCodable] = [
-                            "fromLocation": AnyCodable(fromCoordinate),
-                            "toLocation": AnyCodable(toCoordinate),
-                            "travelTime": AnyCodable(travelTime)
-                        ]
-                        
-                        var updatedMeetingData = meetingAvailabilityData
-                        updatedMeetingData["fromCoordinate"] = AnyCodable(fromCoordinate)
-                        updatedMeetingData["toCoordinate"] = AnyCodable(toCoordinate)
-                        updatedMeetingData["travelTime"] = AnyCodable(travelTime)
-                        
-                        let arrivalTime = flight.actualArrivalTime ?? flight.arrivalTime
-                        let arrivalPlusTravel = arrivalTime.addingTimeInterval(travelTime+20*60)
-                        let canMakeIt = arrivalPlusTravel <= eventStartTime
-                        updatedMeetingData["canMakeIt"] = AnyCodable(canMakeIt)
-                        
-                        let combinedData: [String: AnyCodable] = [
-                            "mapData": AnyCodable(mapData),
-                            "meetingAvailabilityData": AnyCodable(updatedMeetingData)
-                        ]
-                        
-                        completion(.success(combinedData))
-                    case .failure(let error):
-                        completion(.failure(error))
-                    }
-                }
+            case .success(let (route, fromCoordinate, toCoordinate)):
+                print("Debug: ActionExecutor - Received successful result from MapsService")
+                print("Debug: ActionExecutor - From coordinate: \(fromCoordinate), To coordinate: \(toCoordinate)")
+                
+                let mapData: [String: AnyCodable] = [
+                    "fromLocation": AnyCodable(["latitude": fromCoordinate.latitude, "longitude": fromCoordinate.longitude]),
+                    "toLocation": AnyCodable(["latitude": toCoordinate.latitude, "longitude": toCoordinate.longitude]),
+                    "route": AnyCodable(route)
+                ]
+                
+                print("Debug: ActionExecutor - Created mapData: \(mapData)")
+                
+                var updatedMeetingData = meetingAvailabilityData
+                updatedMeetingData["fromCoordinate"] = AnyCodable(["latitude": fromCoordinate.latitude, "longitude": fromCoordinate.longitude])
+                updatedMeetingData["toCoordinate"] = AnyCodable(["latitude": toCoordinate.latitude, "longitude": toCoordinate.longitude])
+                updatedMeetingData["travelTime"] = AnyCodable(route.expectedTravelTime)
+                
+                let arrivalTime = flight.actualArrivalTime ?? flight.arrivalTime
+                let arrivalPlusTravel = arrivalTime.addingTimeInterval(route.expectedTravelTime + 20*60)
+                let canMakeIt = arrivalPlusTravel <= eventStartTime
+                updatedMeetingData["canMakeIt"] = AnyCodable(canMakeIt)
+                
+                var combinedData: [String: AnyCodable] = [
+                    "mapData": AnyCodable(mapData),
+                    "meetingAvailabilityData": AnyCodable(updatedMeetingData)
+                ]
+                
+                print("Debug: ActionExecutor - Final combinedData: \(combinedData)")
+                
+                // Create updated UI components
+                var updatedUIComponents: [UIComponent] = []
+                
+                // Add map component
+                let mapComponent = UIComponent(type: "map", properties: ["mapData": AnyCodable(mapData)])
+                updatedUIComponents.append(mapComponent)
+                
+                // Add meeting availability component
+                let meetingComponent = UIComponent(type: "meetingAvailability", properties: updatedMeetingData)
+                updatedUIComponents.append(meetingComponent)
+                
+                // Add text component for travel time
+                let travelTimeMinutes = Int(route.expectedTravelTime / 60) + 20
+                let textContent = "The travel time is \(travelTimeMinutes-20) minutes. You \(canMakeIt ? "will" : "might not") be able to make it to the meeting on time."
+                let textComponent = UIComponent(type: "text", properties: [
+                    "content": AnyCodable(textContent),
+                    "travelTime": AnyCodable(travelTimeMinutes),
+                    "canMakeIt": AnyCodable(canMakeIt)
+                ])
+                updatedUIComponents.append(textComponent)
+
+                combinedData["ui_components"] = AnyCodable(updatedUIComponents)
+
+                print("Debug: ActionExecutor - Final combinedData with updated UI components: \(combinedData)")
+                
+                completion(.success(combinedData))
             case .failure(let error):
+                print("Debug: ActionExecutor - Error from MapsService: \(error)")
                 completion(.failure(error))
             }
         }
@@ -164,37 +190,6 @@ class ActionExecutor {
         return airportCoordinates[code] ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
     }
     
-    private func geocodeAddress(_ address: String, completion: @escaping (Result<CLLocationCoordinate2D, Error>) -> Void) {
-        let geocoder = CLGeocoder()
-        geocoder.geocodeAddressString(address) { placemarks, error in
-            if let error = error {
-                completion(.failure(error))
-            } else if let location = placemarks?.first?.location {
-                completion(.success(location.coordinate))
-            } else {
-                completion(.failure(APIError.noData))
-            }
-        }
-    }
-    
-    private func calculateTravelTime(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D, completion: @escaping (Result<TimeInterval, Error>) -> Void) {
-        let request = MKDirections.Request()
-        request.source = MKMapItem(placemark: MKPlacemark(coordinate: from))
-        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: to))
-        request.transportType = .automobile
-
-        let directions = MKDirections(request: request)
-        directions.calculate { response, error in
-            if let error = error {
-                completion(.failure(error))
-            } else if let route = response?.routes.first {
-                completion(.success(route.expectedTravelTime))
-            } else {
-                completion(.failure(APIError.noData))
-            }
-        }
-    }
-    
     private func handleWeatherAction(_ action: Action, context: [String: Any], completion: @escaping (Result<[String: AnyCodable], Error>) -> Void) {
         guard let flight = context["flight"] as? Flight else {
             completion(.failure(APIError.invalidParameters))
@@ -207,7 +202,19 @@ class ActionExecutor {
         WeatherService.shared.getForecast(location: location, time: time) { result in
             switch result {
             case .success(let weatherData):
-                completion(.success(["weatherData": AnyCodable(weatherData)]))
+                // Unwrap the AnyCodable values
+                let unwrappedWeatherData: [String: Any] = weatherData.mapValues { $0.value }
+                
+                // Create a new UIComponent with the unwrapped data
+                let weatherComponent = UIComponent(type: "weather", properties: ["weatherData": AnyCodable(unwrappedWeatherData)])
+                
+                // Create the final result with the new UIComponent
+                let finalResult: [String: AnyCodable] = [
+                    "weatherData": AnyCodable(unwrappedWeatherData),
+                    "ui_components": AnyCodable([weatherComponent])
+                ]
+                
+                completion(.success(finalResult))
             case .failure(let error):
                 completion(.failure(error))
             }

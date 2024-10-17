@@ -88,8 +88,8 @@ struct FlightDetailView: View {
     private var flightDetails: some View {
         VStack(alignment: .leading, spacing: 16) {
             detailRow(icon: "clock", title: "Duration", value: formatDuration(TimeInterval(viewModel.flight.duration * 60)))
-            detailRow(icon: "seat.fill", title: "Class", value: viewModel.flight.travelClass)
-            detailRow(icon: "ruler", title: "Legroom", value: "\(viewModel.flight.legroom) inches")
+            detailRow(icon: "carseat.left", title: "Class", value: viewModel.flight.travelClass)
+            // detailRow(icon: "ruler", title: "Legroom", value: "\(viewModel.flight.legroom) inches")
         }
         .padding()
         .background(Color.white)

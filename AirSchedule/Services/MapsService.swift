@@ -17,19 +17,20 @@ class MapsService {
     
     private init() {}
     
-    func getDirections(from: String, to: String, arrivalTime: Date, completion: @escaping (Result<MKRoute, Error>) -> Void) {
+    func getDirections(from: String, to: String, arrivalTime: Date, completion: @escaping (Result<(MKRoute, CLLocationCoordinate2D, CLLocationCoordinate2D), Error>) -> Void) {
+        print("Debug: MapsService - getDirections called with from: \(from), to: \(to)")
         queue.async {
             let group = DispatchGroup()
-            var sourceItem: MKMapItem?
-            var destinationItem: MKMapItem?
+            var sourceCoordinate: CLLocationCoordinate2D?
+            var destinationCoordinate: CLLocationCoordinate2D?
             var geocodingError: Error?
             
             group.enter()
-            self.geocodeLocationWithRetry(from, retryCount: 3) { result in
+            self.geocodeLocation(from) { result in
                 defer { group.leave() }
                 switch result {
-                case .success(let mapItem):
-                    sourceItem = mapItem
+                case .success(let coordinate):
+                    sourceCoordinate = coordinate
                 case .failure(let error):
                     geocodingError = error
                     print("Debug: Geocoding error for 'from' location: \(error.localizedDescription)")
@@ -37,11 +38,11 @@ class MapsService {
             }
             
             group.enter()
-            self.geocodeLocationWithRetry(to, retryCount: 3) { result in
+            self.geocodeLocation(to) { result in
                 defer { group.leave() }
                 switch result {
-                case .success(let mapItem):
-                    destinationItem = mapItem
+                case .success(let coordinate):
+                    destinationCoordinate = coordinate
                 case .failure(let error):
                     geocodingError = error
                     print("Debug: Geocoding error for 'to' location: \(error.localizedDescription)")
@@ -50,79 +51,68 @@ class MapsService {
             
             group.notify(queue: .main) {
                 if let error = geocodingError {
+                    print("Debug: MapsService - Geocoding error: \(error)")
                     completion(.failure(error))
                     return
                 }
                 
-                guard let source = sourceItem, let destination = destinationItem else {
+                guard let source = sourceCoordinate, let destination = destinationCoordinate else {
+                    print("Debug: MapsService - Invalid coordinates")
                     completion(.failure(APIError.invalidResponse(statusCode: 0)))
                     return
                 }
                 
+                print("Debug: MapsService - Coordinates obtained - From: \(source), To: \(destination)")
+                
                 let request = MKDirections.Request()
-                request.source = source
-                request.destination = destination
+                request.source = MKMapItem(placemark: MKPlacemark(coordinate: source))
+                request.destination = MKMapItem(placemark: MKPlacemark(coordinate: destination))
                 request.transportType = .automobile
                 request.arrivalDate = arrivalTime
                 
                 let directions = MKDirections(request: request)
                 directions.calculate { response, error in
                     if let error = error {
+                        print("Debug: MapsService - Directions calculation error: \(error)")
                         completion(.failure(error))
                         return
                     }
                     
                     guard let route = response?.routes.first else {
+                        print("Debug: MapsService - No route found")
                         completion(.failure(APIError.noData))
                         return
                     }
                     
-                    completion(.success(route))
+                    print("Debug: MapsService - Route calculated successfully")
+                    completion(.success((route, source, destination)))
                 }
             }
         }
     }
     
-    private func geocodeLocationWithRetry(_ location: String, retryCount: Int, completion: @escaping (Result<MKMapItem, Error>) -> Void) {
-        print("Debug: Geocoding location: \(location)")
+    private func geocodeLocation(_ location: String, completion: @escaping (Result<CLLocationCoordinate2D, Error>) -> Void) {
         if location.count == 3 { // Assuming it's an airport code
-            getAirportCoordinate(for: location) { result in
-                switch result {
-                case .success(let coordinate):
-                    let placemark = MKPlacemark(coordinate: coordinate)
-                    completion(.success(MKMapItem(placemark: placemark)))
-                case .failure(let error):
-                    print("Debug: Airport coordinate lookup failed: \(error.localizedDescription)")
-                    completion(.failure(error))
-                }
+            if let coordinate = getAirportCoordinate(for: location) {
+                completion(.success(coordinate))
+            } else {
+                completion(.failure(APIError.invalidParameters))
             }
         } else {
             let cleanedLocation = location.replacingOccurrences(of: "\n", with: ", ")
-            print("Debug: Geocoding address: \(cleanedLocation)")
             geocoder.geocodeAddressString(cleanedLocation) { placemarks, error in
                 if let error = error {
-                    print("Debug: Geocoding error: \(error.localizedDescription)")
-                    if retryCount > 0 {
-                        print("Debug: Retrying geocoding. Attempts left: \(retryCount - 1)")
-                        DispatchQueue.global().asyncAfter(deadline: .now() + 2.0) {
-                            self.geocodeLocationWithRetry(location, retryCount: retryCount - 1, completion: completion)
-                        }
-                    } else {
-                        completion(.failure(error))
-                    }
-                } else if let placemark = placemarks?.first {
-                    print("Debug: Geocoding successful")
-                    completion(.success(MKMapItem(placemark: MKPlacemark(placemark: placemark))))
+                    completion(.failure(error))
+                } else if let placemark = placemarks?.first, let coordinate = placemark.location?.coordinate {
+                    completion(.success(coordinate))
                 } else {
-                    print("Debug: No placemark found")
                     completion(.failure(APIError.noData))
                 }
             }
         }
     }
     
-    private func getAirportCoordinate(for code: String, completion: @escaping (Result<CLLocationCoordinate2D, Error>) -> Void) {
-        let uppercasedCode = code.uppercased()
+    private func getAirportCoordinate(for code: String) -> CLLocationCoordinate2D? {
         let airportCoordinates: [String: CLLocationCoordinate2D] = [
             "SFO": CLLocationCoordinate2D(latitude: 37.6188, longitude: -122.3758),
             "LAX": CLLocationCoordinate2D(latitude: 33.9416, longitude: -118.4085),
@@ -131,12 +121,6 @@ class MapsService {
             // Add more airport codes and coordinates as needed
         ]
         
-        if let coordinate = airportCoordinates[uppercasedCode] {
-            print("Debug: Found coordinate for airport code \(uppercasedCode)")
-            completion(.success(coordinate))
-        } else {
-            print("Debug: Unknown airport code: \(uppercasedCode)")
-            completion(.failure(APIError.invalidParameters))
-        }
+        return airportCoordinates[code.uppercased()]
     }
 }
