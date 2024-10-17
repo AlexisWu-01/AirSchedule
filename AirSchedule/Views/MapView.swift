@@ -1,20 +1,12 @@
-//
-//  MapView.swift
-//  AirSchedule
-//
-//  Created by Xinyi Wu on 2024-10-14.
-//
-
 import SwiftUI
 import MapKit
 
 struct MapLocationView: View {
-    let id = UUID()
     let fromCoordinate: CLLocationCoordinate2D
     let toCoordinate: CLLocationCoordinate2D
     @State private var route: MKRoute?
     @State private var region: MKCoordinateRegion
-    
+
     init(fromCoordinate: CLLocationCoordinate2D, toCoordinate: CLLocationCoordinate2D) {
         self.fromCoordinate = fromCoordinate
         self.toCoordinate = toCoordinate
@@ -28,40 +20,43 @@ struct MapLocationView: View {
         )
         _region = State(initialValue: MKCoordinateRegion(center: center, span: span))
     }
-    
+
     var body: some View {
         Map(coordinateRegion: $region, annotationItems: [
-            MapAnnotation(coordinate: fromCoordinate, title: "Start"),
-            MapAnnotation(coordinate: toCoordinate, title: "End")
+            MapAnnotationItem(coordinate: fromCoordinate, title: "Start"),
+            MapAnnotationItem(coordinate: toCoordinate, title: "End")
         ]) { annotation in
             MapMarker(coordinate: annotation.coordinate, tint: annotation.title == "Start" ? .green : .red)
         }
         .frame(height: 300)
         .overlay(
             route.map { route in
-                MapOverlay(route: route)
+                MapOverlay(route: route, region: region)
             }
         )
         .onAppear {
             calculateRoute()
         }
     }
-    
+
     private func calculateRoute() {
         let request = MKDirections.Request()
         request.source = MKMapItem(placemark: MKPlacemark(coordinate: fromCoordinate))
         request.destination = MKMapItem(placemark: MKPlacemark(coordinate: toCoordinate))
-        
+        request.transportType = .automobile // Change as needed
+
         let directions = MKDirections(request: request)
         directions.calculate { response, error in
             if let route = response?.routes.first {
                 self.route = route
+            } else if let error = error {
+                print("Error calculating directions: \(error.localizedDescription)")
             }
         }
     }
 }
 
-struct MapAnnotation: Identifiable {
+struct MapAnnotationItem: Identifiable {
     let id = UUID()
     let coordinate: CLLocationCoordinate2D
     let title: String
@@ -69,36 +64,37 @@ struct MapAnnotation: Identifiable {
 
 struct MapOverlay: View {
     let route: MKRoute
-    
+    let region: MKCoordinateRegion
+
     var body: some View {
         GeometryReader { geometry in
             Path { path in
-                var isFirst = true
-                for coordinate in route.polyline.coordinates() {
-                    let point = geometry.coordinateToPoint(coordinate)
-                    if isFirst {
-                        path.move(to: point)
-                        isFirst = false
-                    } else {
-                        path.addLine(to: point)
-                    }
+                let mapWidth = geometry.size.width
+                let mapHeight = geometry.size.height
+
+                // Calculate the boundaries of the current region
+                let minLatitude = region.center.latitude - (region.span.latitudeDelta / 2)
+                let maxLatitude = region.center.latitude + (region.span.latitudeDelta / 2)
+                let minLongitude = region.center.longitude - (region.span.longitudeDelta / 2)
+                let maxLongitude = region.center.longitude + (region.span.longitudeDelta / 2)
+
+                // Function to convert a coordinate to a CGPoint
+                func point(for coordinate: CLLocationCoordinate2D) -> CGPoint {
+                    let xRatio = (coordinate.longitude - minLongitude) / region.span.longitudeDelta
+                    let yRatio = (maxLatitude - coordinate.latitude) / region.span.latitudeDelta
+                    return CGPoint(x: CGFloat(xRatio) * mapWidth, y: CGFloat(yRatio) * mapHeight)
+                }
+
+                let coordinates = route.polyline.coordinates()
+                guard !coordinates.isEmpty else { return }
+
+                path.move(to: point(for: coordinates[0]))
+                for coord in coordinates.dropFirst() {
+                    path.addLine(to: point(for: coord))
                 }
             }
             .stroke(Color.blue, lineWidth: 3)
         }
-    }
-}
-
-extension GeometryProxy {
-    func coordinateToPoint(_ coordinate: CLLocationCoordinate2D) -> CGPoint {
-        let frame = self.frame(in: .global)
-        let regionWidth = frame.width / (frame.height / 256)
-        let longitudeRatio = (coordinate.longitude + 180) / 360
-        let latitudeRatio = (coordinate.latitude + 90) / 180
-        return CGPoint(
-            x: frame.width * CGFloat(longitudeRatio),
-            y: frame.height * CGFloat(1 - latitudeRatio)
-        )
     }
 }
 
@@ -110,11 +106,11 @@ extension MKPolyline {
     }
 }
 
-struct CustomMapView_Previews: PreviewProvider {
+struct MapLocationView_Previews: PreviewProvider {
     static var previews: some View {
         MapLocationView(
-            fromCoordinate: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
-            toCoordinate: CLLocationCoordinate2D(latitude: 37.3382, longitude: -121.8863)
+            fromCoordinate: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194), // San Francisco
+            toCoordinate: CLLocationCoordinate2D(latitude: 37.3382, longitude: -121.8863) // San Jose
         )
     }
 }
