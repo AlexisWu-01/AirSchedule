@@ -13,7 +13,10 @@ AirSchedule is a comprehensive travel information application designed to help u
 </div>
 <div align="center">
   <a href="https://www.youtube.com/watch?v=99r264qkgGo">
-    <strong>📺 Watch the 10-minute demo video</strong>
+    <strong>📺 Watch the 13-minute demo video with architecture overview</strong>
+  </a> <br>
+    <a href="https://youtu.be/qWV3mgEgeQQ">
+    <strong>📺 Watch the 6-minute app use demo only (portrait video) </strong>
   </a>
 </div>
 
